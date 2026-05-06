@@ -18,14 +18,14 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 4px 6px 8px;
+        padding: 2px 4px 6px;
         box-sizing: border-box;
       }
 
       .app {
         width: min(100%, 480px);
         display: grid;
-        gap: 4px;
+        gap: 2px;
       }
 
       canvas {
@@ -43,14 +43,14 @@
         background: #ffffff;
         border: 1px solid #d9dde8;
         border-radius: 10px;
-        padding: 5px 8px;
+        padding: 4px 7px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       }
 
       .gauge-card {
         display: grid;
-        gap: 2px;
-        padding: 4px 8px;
+        gap: 1px;
+        padding: 3px 7px;
       }
 
       .gauge-label-row {
@@ -94,9 +94,13 @@
         display: none;
       }
 
+      .gauge-card.enemy {
+        display: none;
+      }
+
       .panel {
         display: grid;
-        gap: 4px;
+        gap: 1px;
       }
 
       .result-overlay {
@@ -146,7 +150,7 @@
       .commands {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 4px;
+        gap: 2px;
       }
 
       button {
@@ -155,7 +159,8 @@
         background: #ffffff;
         color: #111827;
         border-radius: 10px;
-        padding: 7px 4px;
+        padding: 12px 4px;
+        min-height: 52px;
         font-size: 11px;
         font-weight: 700;
         cursor: pointer;
@@ -180,7 +185,7 @@
       }
 
       #operator {
-        padding: 4px 6px;
+        padding: 1px 6px;
         background: rgba(255, 255, 255, 0.75);
         border: 1px solid rgba(203, 213, 225, 0.8);
         border-radius: 8px;
@@ -196,11 +201,11 @@
 
       @media (max-width: 520px) {
         body {
-          padding: 3px 4px 6px;
+          padding: 2px 3px 5px;
         }
 
         .commands {
-          gap: 3px;
+          gap: 2px;
         }
 
         button {
@@ -212,7 +217,7 @@
   </head>
   <body>
     <div class="app">
-      <section class="gauge-card">
+      <section class="gauge-card enemy">
         <div class="gauge-label-row">
           <span>B BASE HP</span>
           <span id="bGaugeValueText">10000 / 10000</span>
@@ -225,8 +230,8 @@
       <canvas id="canvas" width="480" height="670"></canvas>
       <section class="gauge-card">
         <div class="gauge-label-row">
-          <span>A BASE HP</span>
-          <span id="aGaugeValueText">10000 / 10000</span>
+          <span>本陣HP</span>
+          <span id="aGaugeValueText">10000 / 10000　修理状況: なし</span>
         </div>
         <div class="gauge-row">
           <div class="gauge-track"><div id="aGauge" class="gauge-fill"></div></div>
@@ -235,7 +240,7 @@
       </section>
       <div class="panel">
         <div id="roundInfo" class="selection">Round 1 / 10</div>
-        <div id="operator" class="selection">OPERATOR: 司令、戦況を確認してください。<br />現在の作戦候補を提示します。</div>
+        <div id="operator" class="selection">司令、戦況を確認してください。<br />現在の作戦候補を提示します。</div>
         <div class="commands">
           <button type="button" data-command="A.中央突破">A.中央突破</button>
           <button type="button" data-command="B.側面展開">B.側面展開</button>
@@ -247,6 +252,7 @@
       <div class="result-card">
         <div id="resultTitle" class="result-title"></div>
         <div id="resultSubtitle" class="result-subtitle"></div>
+        <div id="resultHistory" class="result-subtitle"></div>
         <button type="button" id="restartButton">Restart</button>
       </div>
     </div>
@@ -256,13 +262,22 @@
 
       const maxBaseHp = 10000;
       const maxRound = 10;
+      const maxUnitsA = 8;
+      const maxUnitsB = 8;
+      const repairUnitNames = ["L_1", "S_1", "R_3", "J_2", "H_4", "E_5", "L_6", "S_7"];
 
       const state = {
         round: 1,
         baseHpA: maxBaseHp,
         baseHpB: maxBaseHp,
         result: null,
-        lastSelection: "なし",
+        commandHistory: [],
+        repairQueueA: [],
+        repairQueueB: [],
+        damagePoolA: 0,
+        damagePoolB: 0,
+        nextRepairUnitIndexA: 0,
+        nextRepairUnitIndexB: 0,
       };
 
       const map = [
@@ -315,14 +330,23 @@
 
       function getOperatorReport(baseHpA, baseHpB, maxHp) {
         return [
-          "OPERATOR:",
           getFriendlyDamageReport(baseHpA, maxHp),
           getEnemyResultReport(baseHpB, maxHp),
           "現在の作戦候補を提示します。",
         ].join("<br />");
       }
 
-      function drawBaseHpGauge(gaugeId, valueId, currentHp, maxHp) {
+      function toCircledDigit(value) {
+        const digits = ["", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨"];
+        return digits[value] ?? `${value}`;
+      }
+
+      function getRepairStatusText(queue) {
+        if (!queue.length) return "なし";
+        return queue.map((item) => `${item.name}${toCircledDigit(item.timer)}`).join(" ");
+      }
+
+      function drawBaseHpGauge(gaugeId, valueId, currentHp, maxHp, extraText = "") {
         const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
         const fill = document.getElementById(gaugeId);
         const value = document.getElementById(valueId);
@@ -335,7 +359,7 @@
           value.textContent = `${currentHp} / ${maxHp}`;
         }
         if (inlineValue) {
-          inlineValue.textContent = `${currentHp} / ${maxHp}`;
+          inlineValue.textContent = `${currentHp} / ${maxHp}${extraText ? `　修理状況: ${extraText}` : ""}`;
         }
       }
 
@@ -380,7 +404,7 @@
         document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
         document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
         drawBaseHpGauge("bGauge", "bGaugeValue", state.baseHpB, maxBaseHp);
-        drawBaseHpGauge("aGauge", "aGaugeValue", state.baseHpA, maxBaseHp);
+        drawBaseHpGauge("aGauge", "aGaugeValue", state.baseHpA, maxBaseHp, getRepairStatusText(state.repairQueueA));
         drawMap();
       }
 
@@ -389,9 +413,9 @@
           case "A.中央突破":
             return { damageA: 3000, damageB: 2000 };
           case "B.側面展開":
-            return { damageA: 500, damageB: 1500 };
+            return { damageA: 500, damageB: 1000 };
           case "C.迎撃対応":
-            return { damageA: 1000, damageB: 1000 };
+            return { damageA: 200, damageB: 600 };
           default:
             return { damageA: 0, damageB: 0 };
         }
@@ -417,13 +441,7 @@
       }
 
       function finalizeByHp() {
-        if (state.baseHpA > state.baseHpB) {
-          state.result = "WIN";
-        } else if (state.baseHpA < state.baseHpB) {
-          state.result = "LOSE";
-        } else {
-          state.result = "DRAW";
-        }
+        state.result = "DRAW";
       }
 
       function setCommandButtonsEnabled(enabled) {
@@ -432,10 +450,57 @@
         });
       }
 
+      function getActiveUnitCount(team) {
+        return team === "A" ? maxUnitsA - state.repairQueueA.length : maxUnitsB - state.repairQueueB.length;
+      }
+
+      function getNextRepairUnitName(team) {
+        if (team === "A") {
+          const name = repairUnitNames[state.nextRepairUnitIndexA % repairUnitNames.length];
+          state.nextRepairUnitIndexA += 1;
+          return name;
+        }
+        const name = repairUnitNames[state.nextRepairUnitIndexB % repairUnitNames.length];
+        state.nextRepairUnitIndexB += 1;
+        return name;
+      }
+
+      function addRepairsFromDamage(team, damageAmount) {
+        const damagePoolKey = team === "A" ? "damagePoolA" : "damagePoolB";
+        const queueKey = team === "A" ? "repairQueueA" : "repairQueueB";
+        const maxUnits = team === "A" ? maxUnitsA : maxUnitsB;
+        state[damagePoolKey] += damageAmount;
+        resolveRepairPool(team);
+      }
+
+      function resolveRepairPool(team) {
+        const damagePoolKey = team === "A" ? "damagePoolA" : "damagePoolB";
+        const queueKey = team === "A" ? "repairQueueA" : "repairQueueB";
+        const maxUnits = team === "A" ? maxUnitsA : maxUnitsB;
+        while (state[damagePoolKey] >= 1000 && state[queueKey].length < maxUnits) {
+          state[damagePoolKey] -= 1000;
+          state[queueKey].push({ name: getNextRepairUnitName(team), timer: 3 });
+        }
+      }
+
+      function advanceRepairQueues() {
+        for (const queue of [state.repairQueueA, state.repairQueueB]) {
+          for (let i = queue.length - 1; i >= 0; i--) {
+            queue[i].timer -= 1;
+            if (queue[i].timer <= 0) {
+              queue.splice(i, 1);
+            }
+          }
+        }
+        resolveRepairPool("A");
+        resolveRepairPool("B");
+      }
+
       function showResult() {
         const resultOverlay = document.getElementById("resultOverlay");
         const resultTitle = document.getElementById("resultTitle");
         const resultSubtitle = document.getElementById("resultSubtitle");
+        const resultHistory = document.getElementById("resultHistory");
         resultOverlay.classList.add("show");
         resultOverlay.setAttribute("aria-hidden", "false");
         resultTitle.textContent = state.result ?? "";
@@ -446,6 +511,7 @@
         } else {
           resultSubtitle.textContent = "戦線膠着";
         }
+        resultHistory.textContent = `作戦履歴: ${state.commandHistory.length ? state.commandHistory.join(" ") : "なし"}`;
       }
 
       function resetGame() {
@@ -453,11 +519,18 @@
         state.baseHpA = maxBaseHp;
         state.baseHpB = maxBaseHp;
         state.result = null;
-        state.lastSelection = "なし";
+        state.commandHistory = [];
+        state.repairQueueA = [];
+        state.repairQueueB = [];
+        state.damagePoolA = 0;
+        state.damagePoolB = 0;
+        state.nextRepairUnitIndexA = 0;
+        state.nextRepairUnitIndexB = 0;
         document.getElementById("resultOverlay").classList.remove("show");
         document.getElementById("resultOverlay").setAttribute("aria-hidden", "true");
         document.getElementById("resultTitle").textContent = "";
         document.getElementById("resultSubtitle").textContent = "";
+        document.getElementById("resultHistory").textContent = "";
         document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
         setCommandButtonsEnabled(true);
         render();
@@ -466,11 +539,19 @@
       function handleCommand(commandId) {
         if (state.result) return;
 
-        state.lastSelection = commandId;
+        state.commandHistory.push(commandId[0]);
 
         const chosenDamage = getCommandDamage(commandId);
-        state.baseHpA = Math.max(0, state.baseHpA - chosenDamage.damageA);
-        state.baseHpB = Math.max(0, state.baseHpB - chosenDamage.damageB);
+        const activeA = getActiveUnitCount("A");
+        const activeB = getActiveUnitCount("B");
+        const actualDamageA = Math.round(chosenDamage.damageA * (activeB / maxUnitsB));
+        const actualDamageB = Math.round(chosenDamage.damageB * (activeA / maxUnitsA));
+
+        state.baseHpA = Math.max(0, state.baseHpA - actualDamageA);
+        state.baseHpB = Math.max(0, state.baseHpB - actualDamageB);
+        addRepairsFromDamage("A", actualDamageA);
+        addRepairsFromDamage("B", actualDamageB);
+        advanceRepairQueues();
 
         if (judgeResult()) {
           render();
