@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FRONTLINE LOGIC - HTML Prototype</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #f6f7fb;
+        font-family: sans-serif;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 16px 12px 24px;
+        box-sizing: border-box;
+      }
+
+      .app {
+        width: min(100%, 480px);
+        display: grid;
+        gap: 14px;
+      }
+
+      canvas {
+        background: #ffffff;
+        border: 1px solid #d9dde8;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .panel {
+        display: grid;
+        gap: 10px;
+      }
+
+      .commands {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      button {
+        appearance: none;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #111827;
+        border-radius: 10px;
+        padding: 12px 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      button:hover {
+        background: #f8fafc;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .selection {
+        min-height: 24px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+
+      #operator {
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        border-radius: 10px;
+      }
+
+      #result {
+        font-size: 18px;
+      }
+
+      #restartButton {
+        width: 100%;
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 10px;
+        }
+
+        .commands {
+          gap: 6px;
+        }
+
+        button {
+          padding: 12px 6px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <canvas id="canvas" width="480" height="720"></canvas>
+      <div class="panel">
+        <div id="roundInfo" class="selection">Round 1 / 10</div>
+        <div id="operator" class="selection">OPERATOR: 司令、戦況を確認してください。<br />現在の作戦候補を提示します。</div>
+        <div class="commands">
+          <button type="button" data-command="A.中央突破">A.中央突破</button>
+          <button type="button" data-command="B.側面展開">B.側面展開</button>
+          <button type="button" data-command="C.迎撃対応">C.迎撃対応</button>
+        </div>
+        <div id="selection" class="selection">選択: なし</div>
+        <div id="damage" class="selection"></div>
+        <div id="result" class="selection"></div>
+        <div class="commands" style="grid-template-columns: 1fr;">
+          <button type="button" id="restartButton" style="display:none;">Restart</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxBaseHp = 10000;
+      const maxRound = 10;
+
+      const state = {
+        round: 1,
+        baseHpA: maxBaseHp,
+        baseHpB: maxBaseHp,
+        result: null,
+        lastSelection: "なし",
+      };
+
+      const map = [
+        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
+        ["bridge", "river", "river", "bridge", "river", "river", "river", "bridge", "river"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
+      ];
+
+      const terrainStyles = {
+        forest: { fill: "#2f6b3f", label: "森" },
+        road: { fill: "#c7a26a", label: "道" },
+        plain: { fill: "#dfe9c6", label: "平" },
+        river: { fill: "#4f8fcf", label: "川" },
+        bridge: { fill: "#b8894e", label: "橋" },
+      };
+
+      function getTerrainStyle(terrain) {
+        return terrainStyles[terrain] ?? { fill: "#cccccc", label: "?" };
+      }
+
+      function getTerrainLabel(terrain) {
+        return getTerrainStyle(terrain).label;
+      }
+
+      function drawBaseHpGauge(label, currentHp, maxHp, x, y, width, height) {
+        const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = "#253047";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+
+        ctx.fillStyle = hpRate > 0.5 ? "#2f7d32" : hpRate > 0.2 ? "#d97706" : "#c62828";
+        ctx.fillRect(x + 2, y + 2, Math.floor((width - 4) * hpRate), height - 4);
+
+        ctx.fillStyle = "#111827";
+        ctx.font = "bold 18px sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "bottom";
+        ctx.fillText(`${label}: ${currentHp} / ${maxHp}`, x, y - 8);
+      }
+
+      function drawMap() {
+        const cols = map[0].length;
+        const rows = map.length;
+        const headerHeight = 86;
+        const footerHeight = 86;
+        const cellSize = Math.floor(Math.min(canvas.width / cols, (canvas.height - headerHeight - footerHeight) / rows));
+        const gridWidth = cellSize * cols;
+        const gridHeight = cellSize * rows;
+        const offsetX = Math.floor((canvas.width - gridWidth) / 2);
+        const offsetY = headerHeight + Math.floor(((canvas.height - headerHeight - footerHeight) - gridHeight) / 2);
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const terrain = map[y][x];
+            const { fill } = getTerrainStyle(terrain);
+            const px = offsetX + x * cellSize;
+            const py = offsetY + y * cellSize;
+
+            ctx.fillStyle = fill;
+            ctx.fillRect(px, py, cellSize, cellSize);
+            ctx.strokeRect(px, py, cellSize, cellSize);
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.font = `bold ${Math.max(16, Math.floor(cellSize * 0.42))}px sans-serif`;
+            ctx.fillText(getTerrainLabel(terrain), px + cellSize / 2, py + cellSize / 2);
+          }
+        }
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#f6f7fb";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#1f2937";
+        ctx.font = "bold 22px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("FRONTLINE LOGIC - HTML Prototype", canvas.width / 2, 28);
+
+        drawBaseHpGauge("B BASE HP", state.baseHpB, maxBaseHp, 24, 48, canvas.width - 48, 20);
+        drawMap();
+        drawBaseHpGauge("A BASE HP", state.baseHpA, maxBaseHp, 24, canvas.height - 44, canvas.width - 48, 20);
+
+        if (state.result) {
+          ctx.fillStyle = "rgba(17, 24, 39, 0.72)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 64px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(state.result, canvas.width / 2, canvas.height / 2);
+        }
+
+        document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
+        document.getElementById("selection").textContent = `選択: ${state.lastSelection}`;
+        document.getElementById("result").textContent = state.result ? `結果: ${state.result}` : "";
+      }
+
+      function getCommandDamage(commandId) {
+        switch (commandId) {
+          case "A.中央突破":
+            return { damageA: 3000, damageB: 2000 };
+          case "B.側面展開":
+            return { damageA: 500, damageB: 1500 };
+          case "C.迎撃対応":
+            return { damageA: 1000, damageB: 1000 };
+          default:
+            return { damageA: 0, damageB: 0 };
+        }
+      }
+
+      function applyCommandDamage(commandId) {
+        const damage = getCommandDamage(commandId);
+        document.getElementById("damage").textContent = `DAMAGE: A=${damage.damageA}, B=${damage.damageB}`;
+      }
+
+      function judgeResult() {
+        if (state.baseHpA <= 0 && state.baseHpB <= 0) {
+          state.result = "DRAW";
+          return true;
+        }
+
+        if (state.baseHpB <= 0) {
+          state.result = "WIN";
+          return true;
+        }
+
+        if (state.baseHpA <= 0) {
+          state.result = "LOSE";
+          return true;
+        }
+
+        return false;
+      }
+
+      function finalizeByHp() {
+        if (state.baseHpA > state.baseHpB) {
+          state.result = "WIN";
+        } else if (state.baseHpA < state.baseHpB) {
+          state.result = "LOSE";
+        } else {
+          state.result = "DRAW";
+        }
+      }
+
+      function setCommandButtonsEnabled(enabled) {
+        document.querySelectorAll("button[data-command]").forEach((button) => {
+          button.disabled = !enabled;
+        });
+      }
+
+      function showResult() {
+        document.getElementById("result").textContent = state.result ? `結果: ${state.result}` : "";
+        document.getElementById("restartButton").style.display = "block";
+      }
+
+      function resetGame() {
+        state.round = 1;
+        state.baseHpA = maxBaseHp;
+        state.baseHpB = maxBaseHp;
+        state.result = null;
+        state.lastSelection = "なし";
+        document.getElementById("selection").textContent = "選択: なし";
+        document.getElementById("damage").textContent = "";
+        document.getElementById("result").textContent = "";
+        document.getElementById("restartButton").style.display = "none";
+        setCommandButtonsEnabled(true);
+        render();
+      }
+
+      function handleCommand(commandId) {
+        if (state.result) return;
+
+        state.lastSelection = commandId;
+        applyCommandDamage(commandId);
+
+        const chosenDamage = getCommandDamage(commandId);
+        state.baseHpA = Math.max(0, state.baseHpA - chosenDamage.damageA);
+        state.baseHpB = Math.max(0, state.baseHpB - chosenDamage.damageB);
+
+        document.getElementById("selection").textContent = `選択: ${commandId}`;
+
+        if (judgeResult()) {
+          render();
+          setCommandButtonsEnabled(false);
+          showResult();
+          return;
+        }
+
+        if (state.round >= maxRound) {
+          finalizeByHp();
+          render();
+          setCommandButtonsEnabled(false);
+          showResult();
+          return;
+        }
+
+        state.round += 1;
+        render();
+      }
+
+      document.querySelectorAll("button[data-command]").forEach((button) => {
+        button.addEventListener("click", () => handleCommand(button.dataset.command));
+      });
+
+      document.getElementById("restartButton").addEventListener("click", resetGame);
+
+      render();
+    </script>
+  </body>
+</html>
