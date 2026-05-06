@@ -18,14 +18,14 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 16px 12px 24px;
+        padding: 4px 6px 8px;
         box-sizing: border-box;
       }
 
       .app {
         width: min(100%, 480px);
         display: grid;
-        gap: 14px;
+        gap: 4px;
       }
 
       canvas {
@@ -35,17 +35,118 @@
         display: block;
         width: 100%;
         height: auto;
+        max-width: 100%;
+      }
+
+      .gauge-card,
+      .panel {
+        background: #ffffff;
+        border: 1px solid #d9dde8;
+        border-radius: 10px;
+        padding: 5px 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      .gauge-card {
+        display: grid;
+        gap: 2px;
+        padding: 4px 8px;
+      }
+
+      .gauge-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .gauge-row {
+        display: grid;
+        gap: 0;
+      }
+
+      .gauge-track {
+        height: 10px;
+        border-radius: 999px;
+        border: 1px solid #253047;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .gauge-fill {
+        height: 100%;
+        background: #2f7d32;
+        width: 100%;
+      }
+
+      .gauge-fill.low {
+        background: #c62828;
+      }
+
+      .gauge-fill.mid {
+        background: #d97706;
+      }
+
+      .gauge-value {
+        display: none;
       }
 
       .panel {
         display: grid;
-        gap: 10px;
+        gap: 4px;
+      }
+
+      .result-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.72);
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .result-overlay.show {
+        display: flex;
+      }
+
+      .result-card {
+        width: min(100%, 280px);
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 14px 14px 12px;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
+        text-align: center;
+      }
+
+      .result-title {
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: #111827;
+        line-height: 1;
+      }
+
+      .result-subtitle {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        line-height: 1.2;
       }
 
       .commands {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+        gap: 4px;
       }
 
       button {
@@ -54,8 +155,8 @@
         background: #ffffff;
         color: #111827;
         border-radius: 10px;
-        padding: 12px 8px;
-        font-size: 15px;
+        padding: 7px 4px;
+        font-size: 11px;
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -70,48 +171,68 @@
       }
 
       .selection {
-        min-height: 24px;
-        font-size: 15px;
+        min-height: 0;
+        font-size: 11px;
         font-weight: 700;
         color: #1f2937;
-        line-height: 1.4;
+        line-height: 1.2;
         word-break: break-word;
       }
 
       #operator {
-        padding: 10px 12px;
+        padding: 4px 6px;
         background: rgba(255, 255, 255, 0.75);
         border: 1px solid rgba(203, 213, 225, 0.8);
-        border-radius: 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        line-height: 1.25;
       }
 
-      #result {
-        font-size: 18px;
-      }
-
-      #restartButton {
+      .result-card #restartButton {
         width: 100%;
+        padding: 10px 8px;
+        font-size: 14px;
       }
 
       @media (max-width: 520px) {
         body {
-          padding: 10px;
+          padding: 3px 4px 6px;
         }
 
         .commands {
-          gap: 6px;
+          gap: 3px;
         }
 
         button {
-          padding: 12px 6px;
-          font-size: 14px;
+          padding: 6px 3px;
+          font-size: 10px;
         }
       }
     </style>
   </head>
   <body>
     <div class="app">
-      <canvas id="canvas" width="480" height="720"></canvas>
+      <section class="gauge-card">
+        <div class="gauge-label-row">
+          <span>B BASE HP</span>
+          <span id="bGaugeValueText">10000 / 10000</span>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-track"><div id="bGauge" class="gauge-fill"></div></div>
+          <div id="bGaugeValue" class="gauge-value">10000 / 10000</div>
+        </div>
+      </section>
+      <canvas id="canvas" width="480" height="507"></canvas>
+      <section class="gauge-card">
+        <div class="gauge-label-row">
+          <span>A BASE HP</span>
+          <span id="aGaugeValueText">10000 / 10000</span>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-track"><div id="aGauge" class="gauge-fill"></div></div>
+          <div id="aGaugeValue" class="gauge-value">10000 / 10000</div>
+        </div>
+      </section>
       <div class="panel">
         <div id="roundInfo" class="selection">Round 1 / 10</div>
         <div id="operator" class="selection">OPERATOR: 司令、戦況を確認してください。<br />現在の作戦候補を提示します。</div>
@@ -120,12 +241,13 @@
           <button type="button" data-command="B.側面展開">B.側面展開</button>
           <button type="button" data-command="C.迎撃対応">C.迎撃対応</button>
         </div>
-        <div id="selection" class="selection">選択: なし</div>
-        <div id="damage" class="selection"></div>
-        <div id="result" class="selection"></div>
-        <div class="commands" style="grid-template-columns: 1fr;">
-          <button type="button" id="restartButton" style="display:none;">Restart</button>
-        </div>
+      </div>
+    </div>
+    <div id="resultOverlay" class="result-overlay" aria-hidden="true">
+      <div class="result-card">
+        <div id="resultTitle" class="result-title"></div>
+        <div id="resultSubtitle" class="result-subtitle"></div>
+        <button type="button" id="restartButton">Restart</button>
       </div>
     </div>
     <script>
@@ -152,6 +274,11 @@
         ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
         ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
         ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "road", "plain", "plain", "road"],
+        ["forest", "forest", "forest", "road", "road", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "forest", "road", "plain", "road", "plain", "plain", "road"],
+        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
       ];
 
       const terrainStyles = {
@@ -170,52 +297,77 @@
         return getTerrainStyle(terrain).label;
       }
 
-      function drawBaseHpGauge(label, currentHp, maxHp, x, y, width, height) {
+      function getFriendlyDamageReport(baseHpA, maxHp) {
+        const ratio = maxHp > 0 ? baseHpA / maxHp : 0;
+        if (ratio >= 0.8) return "味方部隊の損耗は軽微です。";
+        if (ratio >= 0.5) return "味方前衛に被害が出ています。";
+        if (ratio >= 0.2) return "味方スナイパーが破損。前線維持に注意してください。";
+        return "味方部隊は危険域です。本陣防衛を優先してください。";
+      }
+
+      function getEnemyResultReport(baseHpB, maxBaseHp) {
+        const ratio = maxBaseHp > 0 ? baseHpB / maxBaseHp : 0;
+        if (ratio >= 0.8) return "敵本陣への有効打はまだ限定的です。";
+        if (ratio >= 0.5) return "敵本陣に損傷を確認しています。";
+        if (ratio >= 0.2) return "敵本陣は大きく損傷しています。";
+        return "敵本陣は崩壊寸前です。";
+      }
+
+      function getOperatorReport(baseHpA, baseHpB, maxHp) {
+        return [
+          "OPERATOR:",
+          getFriendlyDamageReport(baseHpA, maxHp),
+          getEnemyResultReport(baseHpB, maxHp),
+          "現在の作戦候補を提示します。",
+        ].join("<br />");
+      }
+
+      function drawBaseHpGauge(gaugeId, valueId, currentHp, maxHp) {
         const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(x, y, width, height);
-        ctx.strokeStyle = "#253047";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
-
-        ctx.fillStyle = hpRate > 0.5 ? "#2f7d32" : hpRate > 0.2 ? "#d97706" : "#c62828";
-        ctx.fillRect(x + 2, y + 2, Math.floor((width - 4) * hpRate), height - 4);
-
-        ctx.fillStyle = "#111827";
-        ctx.font = "bold 18px sans-serif";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "bottom";
-        ctx.fillText(`${label}: ${currentHp} / ${maxHp}`, x, y - 8);
+        const fill = document.getElementById(gaugeId);
+        const value = document.getElementById(valueId);
+        const inlineValue = document.getElementById(valueId + "Text");
+        if (fill) {
+          fill.style.width = `${hpRate * 100}%`;
+          fill.className = `gauge-fill ${hpRate > 0.5 ? "" : hpRate > 0.2 ? "mid" : "low"}`.trim();
+        }
+        if (value) {
+          value.textContent = `${currentHp} / ${maxHp}`;
+        }
+        if (inlineValue) {
+          inlineValue.textContent = `${currentHp} / ${maxHp}`;
+        }
       }
 
       function drawMap() {
         const cols = map[0].length;
         const rows = map.length;
-        const headerHeight = 86;
-        const footerHeight = 86;
-        const cellSize = Math.floor(Math.min(canvas.width / cols, (canvas.height - headerHeight - footerHeight) / rows));
-        const gridWidth = cellSize * cols;
-        const gridHeight = cellSize * rows;
-        const offsetX = Math.floor((canvas.width - gridWidth) / 2);
-        const offsetY = headerHeight + Math.floor(((canvas.height - headerHeight - footerHeight) - gridHeight) / 2);
+        const cellSize = Math.floor(Math.min(canvas.width / cols, canvas.height / rows));
+        const mapWidth = cellSize * cols;
+        const mapHeight = cellSize * rows;
+        const mapX = Math.floor((canvas.width - mapWidth) / 2);
+        const mapY = 0;
 
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `bold ${Math.max(16, Math.floor(cellSize * 0.42))}px sans-serif`;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
 
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
             const terrain = map[y][x];
             const { fill } = getTerrainStyle(terrain);
-            const px = offsetX + x * cellSize;
-            const py = offsetY + y * cellSize;
+            const px = mapX + x * cellSize;
+            const py = mapY + y * cellSize;
 
             ctx.fillStyle = fill;
             ctx.fillRect(px, py, cellSize, cellSize);
             ctx.strokeRect(px, py, cellSize, cellSize);
 
             ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.font = `bold ${Math.max(16, Math.floor(cellSize * 0.42))}px sans-serif`;
-            ctx.fillText(getTerrainLabel(terrain), px + cellSize / 2, py + cellSize / 2);
+            ctx.fillText(getTerrainLabel(terrain), Math.round(px + cellSize / 2), Math.round(py + cellSize / 2));
           }
         }
       }
@@ -225,29 +377,11 @@
         ctx.fillStyle = "#f6f7fb";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = "#1f2937";
-        ctx.font = "bold 22px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("FRONTLINE LOGIC - HTML Prototype", canvas.width / 2, 28);
-
-        drawBaseHpGauge("B BASE HP", state.baseHpB, maxBaseHp, 24, 48, canvas.width - 48, 20);
-        drawMap();
-        drawBaseHpGauge("A BASE HP", state.baseHpA, maxBaseHp, 24, canvas.height - 44, canvas.width - 48, 20);
-
-        if (state.result) {
-          ctx.fillStyle = "rgba(17, 24, 39, 0.72)";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 64px sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(state.result, canvas.width / 2, canvas.height / 2);
-        }
-
         document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
-        document.getElementById("selection").textContent = `選択: ${state.lastSelection}`;
-        document.getElementById("result").textContent = state.result ? `結果: ${state.result}` : "";
+        document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
+        drawBaseHpGauge("bGauge", "bGaugeValue", state.baseHpB, maxBaseHp);
+        drawBaseHpGauge("aGauge", "aGaugeValue", state.baseHpA, maxBaseHp);
+        drawMap();
       }
 
       function getCommandDamage(commandId) {
@@ -261,11 +395,6 @@
           default:
             return { damageA: 0, damageB: 0 };
         }
-      }
-
-      function applyCommandDamage(commandId) {
-        const damage = getCommandDamage(commandId);
-        document.getElementById("damage").textContent = `DAMAGE: A=${damage.damageA}, B=${damage.damageB}`;
       }
 
       function judgeResult() {
@@ -304,8 +433,19 @@
       }
 
       function showResult() {
-        document.getElementById("result").textContent = state.result ? `結果: ${state.result}` : "";
-        document.getElementById("restartButton").style.display = "block";
+        const resultOverlay = document.getElementById("resultOverlay");
+        const resultTitle = document.getElementById("resultTitle");
+        const resultSubtitle = document.getElementById("resultSubtitle");
+        resultOverlay.classList.add("show");
+        resultOverlay.setAttribute("aria-hidden", "false");
+        resultTitle.textContent = state.result ?? "";
+        if (state.result === "WIN") {
+          resultSubtitle.textContent = "作戦成功";
+        } else if (state.result === "LOSE") {
+          resultSubtitle.textContent = "作戦失敗";
+        } else {
+          resultSubtitle.textContent = "戦線膠着";
+        }
       }
 
       function resetGame() {
@@ -314,10 +454,11 @@
         state.baseHpB = maxBaseHp;
         state.result = null;
         state.lastSelection = "なし";
-        document.getElementById("selection").textContent = "選択: なし";
-        document.getElementById("damage").textContent = "";
-        document.getElementById("result").textContent = "";
-        document.getElementById("restartButton").style.display = "none";
+        document.getElementById("resultOverlay").classList.remove("show");
+        document.getElementById("resultOverlay").setAttribute("aria-hidden", "true");
+        document.getElementById("resultTitle").textContent = "";
+        document.getElementById("resultSubtitle").textContent = "";
+        document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
         setCommandButtonsEnabled(true);
         render();
       }
@@ -326,13 +467,10 @@
         if (state.result) return;
 
         state.lastSelection = commandId;
-        applyCommandDamage(commandId);
 
         const chosenDamage = getCommandDamage(commandId);
         state.baseHpA = Math.max(0, state.baseHpA - chosenDamage.damageA);
         state.baseHpB = Math.max(0, state.baseHpB - chosenDamage.damageB);
-
-        document.getElementById("selection").textContent = `選択: ${commandId}`;
 
         if (judgeResult()) {
           render();
