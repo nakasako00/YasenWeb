@@ -713,6 +713,21 @@
         return [...visible.values()];
       }
 
+      function isUnitInterceptedByEnemy(unit) {
+        if (unit.team !== "A" || unit.routeId !== "upper" || !unit.alive) {
+          return false;
+        }
+        const enemyUnits = units.filter((other) => other.alive && other.team !== unit.team);
+        for (const observer of enemyUnits) {
+          const route = getRouteById(observer.routeId);
+          const effectivePenetration = (observer.stats.visionPenetration + 100) * route.visionRate * distanceScale;
+          if (getTacticalDistance(observer, unit) <= effectivePenetration) {
+            return true;
+          }
+        }
+        return false;
+      }
+
       function findAttackTarget(unit, teamVisibleEnemies) {
         const route = getRouteById(unit.routeId);
         const effectiveMinRange = unit.stats.minRange * route.rangeRate * distanceScale;
@@ -923,7 +938,10 @@
           if (!unit.alive) continue;
           const pxPy = getUnitCanvasPosition(unit, layout);
           const unitRadius = Math.max(10, cellSize * 0.3);
-          ctx.fillStyle = unit.team === "A" ? "#1d4ed8" : "#b91c1c";
+          const concealedShade = unit.team === "A" && unit.routeId === "upper" && !isUnitInterceptedByEnemy(unit);
+          ctx.fillStyle = unit.team === "A"
+            ? (concealedShade ? "rgba(100, 116, 139, 0.75)" : "#1d4ed8")
+            : "#b91c1c";
           ctx.beginPath();
           ctx.arc(pxPy.x, pxPy.y, unitRadius, 0, Math.PI * 2);
           ctx.fill();
