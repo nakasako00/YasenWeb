@@ -2,7 +2,10 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <title>FRONTLINE LOGIC - HTML Prototype</title>
     <style>
       html,
@@ -12,6 +15,11 @@
         height: 100%;
         background: #f6f7fb;
         font-family: sans-serif;
+        touch-action: manipulation;
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       body {
@@ -36,6 +44,10 @@
         width: 100%;
         height: auto;
         max-width: 100%;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       .gauge-card,
@@ -191,6 +203,10 @@
         border-radius: 8px;
         font-size: 11px;
         line-height: 1.25;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       .result-card #restartButton {
@@ -281,22 +297,23 @@
       };
 
       const map = [
-        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
-        ["bridge", "river", "river", "bridge", "river", "river", "river", "bridge", "river"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "plain", "road"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "road", "plain", "plain", "road"],
-        ["forest", "forest", "forest", "road", "road", "plain", "plain", "road", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "plain", "road", "plain"],
-        ["forest", "forest", "forest", "road", "plain", "road", "plain", "plain", "road"],
-        ["forest", "forest", "forest", "road", "plain", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "base", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
+        ["river", "bridge", "river", "river", "bridge", "river", "river", "bridge", "river"],
+        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "base", "plain", "plain", "plain", "plain"],
       ];
 
       const terrainStyles = {
+        base: { fill: "#000000", label: "基" },
         forest: { fill: "#2f6b3f", label: "森" },
         road: { fill: "#c7a26a", label: "道" },
         plain: { fill: "#dfe9c6", label: "平" },

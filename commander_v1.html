@@ -558,7 +558,7 @@
       function getOperatorReport() {
         const nextDeployJob = state.nextDeployJobA ? getJobLabel(state.nextDeployJobA) : "不明部隊";
         return [
-          getEnemyStatusText(),
+          getBattleSituationText(),
           `${nextDeployJob}小隊を出撃させます。派遣レーンを選択してください。`,
         ].join("<br />");
       }
@@ -838,6 +838,32 @@
           return "敵部隊に損耗が出ています。";
         }
         return "敵部隊への損害はまだ限定的です。";
+      }
+
+      function getForceBalanceText() {
+        const aliveA = units.filter((unit) => unit.alive && unit.team === "A").length;
+        const aliveB = units.filter((unit) => unit.alive && unit.team === "B").length;
+        const unitDiff = aliveA - aliveB;
+        if (unitDiff >= 2) {
+          return "戦線枚数ではこちらが優勢です。";
+        }
+        if (unitDiff >= 1) {
+          return "戦線枚数はわずかにこちらが優勢です。";
+        }
+        if (unitDiff === 0) {
+          return "戦線枚数は拮抗しています。";
+        }
+        if (unitDiff <= -2) {
+          return "戦線枚数では押されています。";
+        }
+        return "戦線枚数はやや不利です。";
+      }
+
+      function getBattleSituationText() {
+        const enemyText = getEnemyStatusText();
+        const balanceText = getForceBalanceText();
+        const enemyPrefix = enemyText.endsWith("です。") ? enemyText.slice(0, -2) : enemyText;
+        return `${enemyPrefix}ですが、${balanceText}`;
       }
 
       function getKillCostDamage(killedUnit) {
