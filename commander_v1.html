@@ -2,7 +2,10 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <title>FRONTLINE LOGIC - HTML Prototype</title>
     <style>
       html,
@@ -12,6 +15,11 @@
         height: 100%;
         background: #f6f7fb;
         font-family: sans-serif;
+        touch-action: manipulation;
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       body {
@@ -36,6 +44,10 @@
         width: 100%;
         height: auto;
         max-width: 100%;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       .panel {
@@ -236,6 +248,10 @@
         border-radius: 8px;
         font-size: 11px;
         line-height: 1.25;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
       }
 
       .result-card #restartButton {
