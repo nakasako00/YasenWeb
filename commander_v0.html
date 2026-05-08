@@ -26,14 +26,14 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 2px 4px 6px;
+        padding: 2px 4px 4px;
         box-sizing: border-box;
       }
 
       .app {
         width: min(100%, 480px);
         display: grid;
-        gap: 2px;
+        gap: 1px;
       }
 
       canvas {
@@ -55,7 +55,7 @@
         background: #ffffff;
         border: 1px solid #d9dde8;
         border-radius: 10px;
-        padding: 4px 7px;
+        padding: 6px 9px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       }
 
@@ -106,6 +106,10 @@
         display: none;
       }
 
+      .gauge-card {
+        display: none;
+      }
+
       .gauge-card.enemy {
         display: none;
       }
@@ -144,6 +148,14 @@
         text-align: center;
       }
 
+      .result-overlay.show .result-card,
+      .confirm-overlay.show .confirm-card,
+      .intro-overlay.show .intro-card,
+      .round-report-overlay.show .round-report-card {
+        transform-origin: top center;
+        animation: modalOpenPaperY 190ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
       .result-title {
         font-size: 28px;
         font-weight: 900;
@@ -159,10 +171,41 @@
         line-height: 1.2;
       }
 
+      .result-round {
+        font-size: 12px;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.1;
+      }
+
+      .result-hp {
+        width: 100%;
+        display: grid;
+        gap: 2px;
+        padding: 6px 8px;
+        border: 1px solid #dbe4ef;
+        border-radius: 10px;
+        background: #ffffff;
+        box-sizing: border-box;
+      }
+
+      .result-hp-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #111827;
+      }
+
+      .result-hp-row span:last-child {
+        font-variant-numeric: tabular-nums;
+      }
+
       .commands {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 2px;
+        gap: 4px;
       }
 
       button {
@@ -171,10 +214,10 @@
         background: #ffffff;
         color: #111827;
         border-radius: 10px;
-        padding: 12px 4px;
-        min-height: 52px;
-        font-size: 11px;
-        font-weight: 700;
+        padding: 14px 5px;
+        min-height: 56px;
+        font-size: 13px;
+        font-weight: 800;
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
@@ -189,20 +232,20 @@
 
       .selection {
         min-height: 0;
-        font-size: 11px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 800;
         color: #1f2937;
         line-height: 1.2;
         word-break: break-word;
       }
 
       #operator {
-        padding: 1px 6px;
+        padding: 4px 8px;
         background: rgba(255, 255, 255, 0.75);
         border: 1px solid rgba(203, 213, 225, 0.8);
         border-radius: 8px;
-        font-size: 11px;
-        line-height: 1.25;
+        font-size: 13px;
+        line-height: 1.42;
         touch-action: manipulation;
         -webkit-user-select: none;
         user-select: none;
@@ -215,6 +258,238 @@
         font-size: 14px;
       }
 
+      .confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.74);
+        padding: 14px;
+        box-sizing: border-box;
+      }
+
+      .confirm-overlay.show {
+        display: flex;
+      }
+
+      .confirm-card {
+        width: min(100%, 320px);
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 16px 15px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.26);
+        text-align: center;
+      }
+
+      .confirm-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+      }
+
+      .confirm-command {
+        font-size: 16px;
+        font-weight: 800;
+        color: #1f2937;
+        line-height: 1.15;
+      }
+
+      .confirm-body {
+        display: grid;
+        gap: 5px;
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(241, 245, 249, 0.92);
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.55;
+      }
+
+      .confirm-note {
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        line-height: 1.2;
+      }
+
+      .confirm-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .confirm-actions button {
+        min-height: 58px;
+        padding: 12px 8px;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .intro-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.74);
+        padding: 14px;
+        box-sizing: border-box;
+      }
+
+      .intro-overlay.show {
+        display: flex;
+      }
+
+      .intro-card {
+        width: min(100%, 340px);
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 16px 15px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.26);
+        text-align: center;
+      }
+
+      .intro-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+      }
+
+      .intro-body {
+        display: grid;
+        gap: 6px;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(241, 245, 249, 0.92);
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.55;
+        text-align: left;
+      }
+
+      .intro-actions {
+        width: 100%;
+      }
+
+      .intro-actions button {
+        width: 100%;
+        min-height: 58px;
+        padding: 12px 8px;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      .round-report-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10002;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.72);
+        padding: 14px;
+        box-sizing: border-box;
+      }
+
+      .round-report-overlay.show {
+        display: flex;
+      }
+
+      .round-report-card {
+        width: min(100%, 340px);
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 16px 15px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.26);
+        text-align: center;
+      }
+
+      .round-report-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: 0.04em;
+        line-height: 1.1;
+      }
+
+      .round-report-command {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1f2937;
+        line-height: 1.2;
+      }
+
+      .round-report-body {
+        display: grid;
+        gap: 6px;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(241, 245, 249, 0.92);
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.62;
+        text-align: left;
+      }
+
+      .round-report-actions {
+        width: 100%;
+      }
+
+      .round-report-actions button {
+        width: 100%;
+        min-height: 58px;
+        padding: 12px 8px;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      @keyframes modalOpenPaperY {
+        from {
+          transform: scaleY(0.12);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .result-overlay.show .result-card,
+        .confirm-overlay.show .confirm-card,
+        .intro-overlay.show .intro-card,
+        .round-report-overlay.show .round-report-card {
+          animation: none;
+        }
+      }
+
       @media (max-width: 520px) {
         body {
           padding: 2px 3px 5px;
@@ -225,8 +500,73 @@
         }
 
         button {
-          padding: 6px 3px;
-          font-size: 10px;
+          padding: 8px 3px;
+          font-size: 12px;
+        }
+
+        .confirm-card {
+          width: min(100%, 300px);
+          gap: 8px;
+          padding: 14px 12px 12px;
+        }
+
+        .confirm-title {
+          font-size: 18px;
+        }
+
+        .confirm-command {
+          font-size: 15px;
+        }
+
+        .confirm-body {
+          font-size: 14px;
+        }
+
+        .confirm-actions button {
+          min-height: 54px;
+          font-size: 15px;
+        }
+
+        .intro-card {
+          width: min(100%, 320px);
+          gap: 8px;
+          padding: 14px 12px 12px;
+        }
+
+        .intro-title {
+          font-size: 18px;
+        }
+
+        .intro-body {
+          font-size: 14px;
+        }
+
+        .intro-actions button {
+          min-height: 54px;
+          font-size: 15px;
+        }
+
+        .round-report-card {
+          width: min(100%, 320px);
+          gap: 8px;
+          padding: 14px 12px 12px;
+        }
+
+        .round-report-title {
+          font-size: 18px;
+        }
+
+        .round-report-command {
+          font-size: 14px;
+        }
+
+        .round-report-body {
+          font-size: 14px;
+        }
+
+        .round-report-actions button {
+          min-height: 54px;
+          font-size: 15px;
         }
       }
     </style>
@@ -243,7 +583,7 @@
           <div id="bGaugeValue" class="gauge-value">10000 / 10000</div>
         </div>
       </section>
-      <canvas id="canvas" width="480" height="670"></canvas>
+      <canvas id="canvas" width="480" height="540"></canvas>
       <section class="gauge-card">
         <div class="gauge-label-row">
           <span>本陣HP</span>
@@ -265,11 +605,63 @@
       </div>
     </div>
     <div id="resultOverlay" class="result-overlay" aria-hidden="true">
-      <div class="result-card">
+      <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
         <div id="resultTitle" class="result-title"></div>
         <div id="resultSubtitle" class="result-subtitle"></div>
+        <div id="resultRound" class="result-round"></div>
+        <div id="resultHp" class="result-hp">
+          <div id="resultEnemyHp" class="result-hp-row"></div>
+          <div id="resultAllyHp" class="result-hp-row"></div>
+        </div>
         <div id="resultHistory" class="result-subtitle"></div>
         <button type="button" id="restartButton">Restart</button>
+      </div>
+    </div>
+    <div id="operationConfirmOverlay" class="confirm-overlay" aria-hidden="true">
+      <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div id="confirmTitle" class="confirm-title">作戦実行確認</div>
+        <div id="confirmCommand" class="confirm-command"></div>
+        <div id="confirmBody" class="confirm-body"></div>
+        <div id="confirmNote" class="confirm-note">実行しますか？</div>
+        <div class="confirm-actions">
+          <button type="button" id="confirmYesButton">YES</button>
+          <button type="button" id="confirmNoButton">NO</button>
+        </div>
+      </div>
+    </div>
+    <div id="introOverlay" class="intro-overlay" aria-hidden="true">
+      <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+        <div id="introTitle" class="intro-title">作戦開始ブリーフィング</div>
+        <div id="introBody" class="intro-body">
+          <div>司令、戦況はすでに最終局面にあります。</div>
+          <div>Aチームは敵本陣目前まで前線を押し上げました。</div>
+          <div>しかし、味方も安全ではありません。</div>
+          <div>司令には3つの作戦を提案いたします。</div>
+          <div>A. 中央突破</div>
+          <div>敵本陣へ大きな打撃を狙います。</div>
+          <div>ただし、味方前線の損耗も大きくなります。</div>
+          <div>B. 側面展開</div>
+          <div>敵前線へ圧力をかけ、敵チームの再投入資源を削りつつ、前線枚数差の有利を作ります。</div>
+          <div>ただし、こちらも少なからず被害を受けます。</div>
+          <div>C. 迎撃対応</div>
+          <div>味方の損耗を抑えながら、戦線を整えます。</div>
+          <div>修理負荷が高い時は有効だと思われます。</div>
+          <div>10ラウンド以内に勝利へ導いてください。</div>
+          <div>期待しております。</div>
+        </div>
+        <div class="intro-actions">
+          <button type="button" id="introOkButton">OK</button>
+        </div>
+      </div>
+    </div>
+    <div id="roundReportOverlay" class="round-report-overlay" aria-hidden="true">
+      <div class="round-report-card" role="dialog" aria-modal="true" aria-labelledby="roundReportTitle">
+        <div id="roundReportTitle" class="round-report-title"></div>
+        <div id="roundReportCommand" class="round-report-command"></div>
+        <div id="roundReportBody" class="round-report-body"></div>
+        <div class="round-report-actions">
+          <button type="button" id="roundReportOkButton">OK</button>
+        </div>
       </div>
     </div>
     <script>
@@ -277,6 +669,9 @@
       const ctx = canvas.getContext("2d");
 
       const maxBaseHp = 10000;
+      const FRONTLINE_DAMAGE_PER_CASUALTY = 1000;
+      const MAX_REPAIR_T = 3;
+      const REPAIR_GAUGE_DISPLAY_MAX = 12;
       const maxRound = 10;
       const maxUnitsA = 8;
       const maxUnitsB = 8;
@@ -287,6 +682,13 @@
         baseHpA: maxBaseHp,
         baseHpB: maxBaseHp,
         result: null,
+        pendingCommand: null,
+        isConfirmMode: false,
+        isIntroBriefingOpen: true,
+        lastRoundReport: null,
+        isRoundReportOpen: false,
+        pendingResult: null,
+        pendingRoundAdvance: false,
         commandHistory: [],
         repairQueueA: [],
         repairQueueB: [],
@@ -294,32 +696,81 @@
         damagePoolB: 0,
         nextRepairUnitIndexA: 0,
         nextRepairUnitIndexB: 0,
+        unitDisplayCountA: maxUnitsA,
+        unitDisplayCountB: maxUnitsB,
+        baseHpDisplayA: maxBaseHp,
+        baseHpDisplayB: maxBaseHp,
+        displayedAttackPowerRateA: 1,
+        displayedAttackPowerRateB: 1,
+        displayedRepairRateA: 0,
+        displayedRepairRateB: 0,
+        isUnitDeltaAnimating: false,
+        isBaseHpAnimating: false,
+        isPhaseWaiting: false,
+        unitDeltaPulse: null,
+        unitDeltaAnimationToken: 0,
+        gaugeAnimationToken: 0,
+        phaseWaitToken: 0,
       };
 
       const map = [
-        ["forest", "forest", "forest", "forest", "base", "plain", "plain", "plain", "plain"],
-        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
-        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
-        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
-        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
-        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
-        ["river", "bridge", "river", "river", "bridge", "river", "river", "bridge", "river"],
-        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
-        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
-        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
-        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
-        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
-        ["forest", "forest", "forest", "forest", "base", "plain", "plain", "plain", "plain"],
+        ["road", "road", "road", "b_base", "b_base", "b_base", "road", "road", "road"],
+        ["road", "road", "road", "b_base", "b_base", "b_base", "road", "road", "road"],
+        ["road", "road", "road", "b_base", "b_base", "b_base", "road", "road", "road"],
+        ["road", "road", "road", "road", "road", "road", "road", "road", "road"],
+        ["road", "road", "road", "b_road_7", "b_road_6", "b_road_8", "road", "road", "road"],
+        ["road", "road", "b_road_4", "b_road_2", "b_road_1", "b_road_3", "b_road_5", "road", "road"],
+        ["road", "road", "road", "road", "road", "road", "road", "road", "road"],
+        ["road", "road", "a_road_4", "a_road_2", "a_road_1", "a_road_3", "a_road_5", "road", "road"],
+        ["road", "road", "road", "a_road_7", "a_road_6", "a_road_8", "road", "road", "road"],
+        ["road", "road", "road", "road", "road", "road", "road", "road", "road"],
+        ["road", "road", "road", "a_base", "a_base", "a_base", "road", "road", "road"],
+        ["road", "road", "road", "a_base", "a_base", "a_base", "road", "road", "road"],
+        ["road", "road", "road", "a_base", "a_base", "a_base", "road", "road", "road"],
       ];
 
       const terrainStyles = {
-        base: { fill: "#000000", label: "基" },
+        a_base: { fill: "#1d4ed8", label: "A" },
+        a_road_1: { fill: "#c7a26a", label: "道" },
+        a_road_2: { fill: "#c7a26a", label: "道" },
+        a_road_3: { fill: "#c7a26a", label: "道" },
+        a_road_4: { fill: "#c7a26a", label: "道" },
+        a_road_5: { fill: "#c7a26a", label: "道" },
+        a_road_6: { fill: "#c7a26a", label: "道" },
+        a_road_7: { fill: "#c7a26a", label: "道" },
+        a_road_8: { fill: "#c7a26a", label: "道" },
+        b_base: { fill: "#b91c1c", label: "B" },
+        b_road_1: { fill: "#c7a26a", label: "道" },
+        b_road_2: { fill: "#c7a26a", label: "道" },
+        b_road_3: { fill: "#c7a26a", label: "道" },
+        b_road_4: { fill: "#c7a26a", label: "道" },
+        b_road_5: { fill: "#c7a26a", label: "道" },
+        b_road_6: { fill: "#c7a26a", label: "道" },
+        b_road_7: { fill: "#c7a26a", label: "道" },
+        b_road_8: { fill: "#c7a26a", label: "道" },
         forest: { fill: "#2f6b3f", label: "森" },
         road: { fill: "#c7a26a", label: "道" },
         plain: { fill: "#dfe9c6", label: "平" },
         river: { fill: "#4f8fcf", label: "川" },
         bridge: { fill: "#b8894e", label: "橋" },
       };
+
+      function buildAbstractUnitSlots() {
+        const slots = { A: [], B: [] };
+        for (let y = 0; y < map.length; y++) {
+          for (let x = 0; x < map[y].length; x++) {
+            const terrain = map[y][x];
+            const match = /^([ab])_road_(\d+)$/.exec(terrain);
+            if (!match) continue;
+            const team = match[1] === "a" ? "A" : "B";
+            const index = Number(match[2]);
+            slots[team][index] = { x, y };
+          }
+        }
+        return slots;
+      }
+
+      const abstractUnitSlots = buildAbstractUnitSlots();
 
       function getTerrainStyle(terrain) {
         return terrainStyles[terrain] ?? { fill: "#cccccc", label: "?" };
@@ -329,12 +780,13 @@
         return getTerrainStyle(terrain).label;
       }
 
-      function getFriendlyDamageReport(baseHpA, maxHp) {
-        const ratio = maxHp > 0 ? baseHpA / maxHp : 0;
-        if (ratio >= 0.8) return "味方部隊の損耗は軽微です。";
-        if (ratio >= 0.5) return "味方前衛に被害が出ています。";
-        if (ratio >= 0.2) return "味方スナイパーが破損。前線維持に注意してください。";
-        return "味方部隊は危険域です。本陣防衛を優先してください。";
+      function getFrontlineStatusReport(activeA, activeB) {
+        const diff = activeA - activeB;
+        if (diff >= 2) return "味方前線は優勢です。";
+        if (diff >= 1) return "味方前線はやや優勢です。";
+        if (diff === 0) return "前線は拮抗しています。";
+        if (diff <= -2) return "味方前線は劣勢です。";
+        return "味方前線はやや劣勢です。";
       }
 
       function getEnemyResultReport(baseHpB, maxBaseHp) {
@@ -346,11 +798,38 @@
       }
 
       function getOperatorReport(baseHpA, baseHpB, maxHp) {
+        const activeA = getActiveUnitCount("A");
+        const activeB = getActiveUnitCount("B");
         return [
-          getFriendlyDamageReport(baseHpA, maxHp),
+          getFrontlineStatusReport(activeA, activeB),
           getEnemyResultReport(baseHpB, maxHp),
           "現在の作戦候補を提示します。",
         ].join("<br />");
+      }
+
+      function getCommandPreviewReport(commandId) {
+        switch (commandId) {
+          case "A.中央突破":
+            return [
+              "中央突破を実行します。",
+              "敵本陣へ大きな打撃が見込めます。",
+              "ただし味方前線の損耗も大きくなります。",
+            ].join("<br />");
+          case "B.側面展開":
+            return [
+              "側面展開を実行します。",
+              "敵前線への打撃が見込めます。",
+              "敵の再投入資源へ圧力をかけます。",
+            ].join("<br />");
+          case "C.迎撃対応":
+            return [
+              "迎撃対応を実行します。",
+              "味方の損耗を抑えやすい作戦です。",
+              "ただし敵本陣への打撃は限定的です。",
+            ].join("<br />");
+          default:
+            return "作戦内容を確認してください。";
+        }
       }
 
       function toCircledDigit(value) {
@@ -361,6 +840,10 @@
       function getRepairStatusText(queue) {
         if (!queue.length) return "なし";
         return queue.map((item) => `${item.name}${toCircledDigit(item.timer)}`).join(" ");
+      }
+
+      function getRepairLoad(queue) {
+        return queue.reduce((sum, item) => sum + Math.max(0, item.timer), 0);
       }
 
       function drawBaseHpGauge(gaugeId, valueId, currentHp, maxHp, extraText = "") {
@@ -399,7 +882,8 @@
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
             const terrain = map[y][x];
-            const { fill } = getTerrainStyle(terrain);
+            const terrainStyle = getTerrainStyle(terrain);
+            const { fill, label } = terrainStyle;
             const px = mapX + x * cellSize;
             const py = mapY + y * cellSize;
 
@@ -408,9 +892,215 @@
             ctx.strokeRect(px, py, cellSize, cellSize);
 
             ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-            ctx.fillText(getTerrainLabel(terrain), Math.round(px + cellSize / 2), Math.round(py + cellSize / 2));
+            ctx.fillText(label, Math.round(px + cellSize / 2), Math.round(py + cellSize / 2));
           }
         }
+      }
+
+      function getCellCenter(mapX, mapY, cellSize, x, y) {
+        return {
+          x: mapX + x * cellSize + cellSize / 2,
+          y: mapY + y * cellSize + cellSize / 2,
+        };
+      }
+
+      function drawBaseHpBadge(layout, team, currentHp, maxHp) {
+        const { cellSize, mapX, mapY, rows } = layout;
+        const baseCell = team === "B" ? { x: 4, y: 0 } : { x: 4, y: rows - 1 };
+        const baseCenter = getCellCenter(mapX, mapY, cellSize, baseCell.x, baseCell.y);
+        const badgeWidth = Math.max(96, Math.round(cellSize * 1.65));
+        const badgeHeight = Math.max(28, Math.round(cellSize * 0.5));
+        const badgeX = baseCenter.x - badgeWidth / 2;
+        const offsetY = team === "B" ? -cellSize * 0.48 : cellSize * 0.48;
+        const badgeY = Math.max(4, Math.min(canvas.height - badgeHeight - 4, baseCenter.y + offsetY - badgeHeight / 2));
+        const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
+
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "rgba(37, 47, 71, 0.36)";
+        ctx.lineWidth = 1;
+        roundRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = `700 ${Math.max(10, Math.floor(cellSize * 0.13))}px sans-serif`;
+        ctx.fillStyle = "#111827";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${currentHp} / ${maxHp}`, badgeX + badgeWidth / 2, badgeY + badgeHeight * 0.26);
+
+        const trackX = badgeX + 10;
+        const trackY = badgeY + badgeHeight * 0.63;
+        const trackW = badgeWidth - 20;
+        const trackH = 7;
+        const gaugeFill = team === "B"
+          ? (hpRate > 0.5 ? "#ef4444" : hpRate > 0.2 ? "#f97316" : "#dc2626")
+          : (hpRate > 0.5 ? "#2563eb" : hpRate > 0.2 ? "#3b82f6" : "#1d4ed8");
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#253047";
+        roundRect(ctx, trackX, trackY, trackW, trackH, 999);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = gaugeFill;
+        const innerTrackX = trackX + 1;
+        const innerTrackW = Math.max(0, trackW - 2);
+        const fillWidth = Math.max(0, Math.round(innerTrackW * hpRate));
+        roundRect(ctx, innerTrackX, trackY + 1, fillWidth, trackH - 2, 999);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawFrontlineGauge(layout, team, rate) {
+        const { cellSize, mapX, mapY, mapHeight } = layout;
+        rate = Math.max(0, Math.min(1, rate));
+        const badgeWidth = Math.max(112, Math.round(cellSize * 1.68));
+        const badgeHeight = Math.max(24, Math.round(cellSize * 0.42));
+        const margin = Math.max(6, Math.round(cellSize * 0.18));
+        const gap = Math.max(4, Math.round(cellSize * 0.1));
+        const badgeX = mapX + Math.max(4, Math.round(cellSize * 0.08));
+        const badgeY = team === "B"
+          ? mapY + margin + badgeHeight + gap
+          : mapY + mapHeight - badgeHeight * 2 - gap - margin;
+        const fillColor = team === "B"
+          ? (rate > 0.5 ? "#dc2626" : rate > 0.2 ? "#f97316" : "#991b1b")
+          : (rate > 0.5 ? "#2563eb" : rate > 0.2 ? "#3b82f6" : "#1d4ed8");
+        const label = "攻撃力";
+
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.strokeStyle = "rgba(37, 47, 71, 0.32)";
+        ctx.lineWidth = 1;
+        roundRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = `700 ${Math.max(9, Math.floor(cellSize * 0.12))}px sans-serif`;
+        ctx.fillStyle = "#111827";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, badgeX + 10, badgeY + badgeHeight * 0.28);
+
+        const trackX = badgeX + 10;
+        const trackY = badgeY + badgeHeight * 0.58;
+        const trackW = badgeWidth - 20;
+        const trackH = 6;
+        const innerTrackX = trackX + 1;
+        const innerTrackW = Math.max(0, trackW - 2);
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.strokeStyle = "#253047";
+        roundRect(ctx, trackX, trackY, trackW, trackH, 999);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = fillColor;
+        roundRect(ctx, innerTrackX, trackY + 1, Math.round(innerTrackW * rate), trackH - 2, 999);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawRepairGauge(layout, team, rate) {
+        const { cellSize, mapX, mapY, mapHeight } = layout;
+        rate = Math.max(0, Math.min(1, rate));
+        const badgeWidth = Math.max(112, Math.round(cellSize * 1.68));
+        const badgeHeight = Math.max(24, Math.round(cellSize * 0.42));
+        const margin = Math.max(6, Math.round(cellSize * 0.18));
+        const badgeX = mapX + Math.max(4, Math.round(cellSize * 0.08));
+        const badgeY = team === "B"
+          ? mapY + margin
+          : mapY + mapHeight - badgeHeight - margin;
+        const fillColor = team === "B"
+          ? (rate > 0.5 ? "#b45309" : rate > 0.2 ? "#d97706" : "#92400e")
+          : (rate > 0.5 ? "#1d4ed8" : rate > 0.2 ? "#3b82f6" : "#2563eb");
+        const label = "修理負荷";
+
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+        ctx.strokeStyle = "rgba(37, 47, 71, 0.28)";
+        ctx.lineWidth = 1;
+        roundRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = `700 ${Math.max(9, Math.floor(cellSize * 0.12))}px sans-serif`;
+        ctx.fillStyle = "#111827";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, badgeX + 10, badgeY + badgeHeight * 0.28);
+
+        const trackX = badgeX + 10;
+        const trackY = badgeY + badgeHeight * 0.58;
+        const trackW = badgeWidth - 20;
+        const trackH = 6;
+        const innerTrackX = trackX + 1;
+        const innerTrackW = Math.max(0, trackW - 2);
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.strokeStyle = "#253047";
+        roundRect(ctx, trackX, trackY, trackW, trackH, 999);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = fillColor;
+        roundRect(ctx, innerTrackX, trackY + 1, Math.round(innerTrackW * rate), trackH - 2, 999);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawAbstractPieces(layout, team, count, pulse = null) {
+        const { cellSize, mapX, mapY } = layout;
+        const slots = abstractUnitSlots[team];
+        const radius = Math.max(4, Math.round(cellSize * 0.22));
+        const pieceFill = team === "B" ? "rgba(185, 28, 28, 0.78)" : "rgba(37, 99, 235, 0.78)";
+        const pieceStroke = "rgba(255, 255, 255, 0.88)";
+        const pieceShadow = "rgba(15, 23, 42, 0.18)";
+
+        ctx.save();
+        ctx.shadowColor = pieceShadow;
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetY = 1;
+
+        const startIndex = Math.max(1, slots.length - count);
+        for (let i = startIndex; i < slots.length; i++) {
+          const slot = slots[i];
+          if (!slot) continue;
+          const point = getCellCenter(mapX, mapY, cellSize, slot.x, slot.y);
+          const slotNumber = i + 1;
+          const isPulse = pulse && pulse.team === team && pulse.slotNumber === slotNumber;
+          ctx.beginPath();
+          ctx.fillStyle = pieceFill;
+          ctx.strokeStyle = pieceStroke;
+          ctx.lineWidth = 1.5;
+          ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          if (isPulse) {
+            ctx.beginPath();
+            ctx.fillStyle = pulse.mode === "remove" ? "rgba(255, 255, 255, 0.32)" : "rgba(255, 255, 255, 0.22)";
+            ctx.strokeStyle = pulse.mode === "remove" ? "rgba(255, 255, 255, 0.88)" : "rgba(255, 255, 255, 0.72)";
+            ctx.lineWidth = 2;
+            ctx.arc(point.x, point.y, radius * 1.45, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+
+          ctx.beginPath();
+          ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
+          ctx.arc(point.x - radius * 0.25, point.y - radius * 0.25, radius * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function roundRect(context, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.arcTo(x + width, y, x + width, y + height, r);
+        context.arcTo(x + width, y + height, x, y + height, r);
+        context.arcTo(x, y + height, x, y, r);
+        context.arcTo(x, y, x + width, y, r);
+        context.closePath();
       }
 
       function render() {
@@ -420,21 +1110,62 @@
 
         document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
         document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
-        drawBaseHpGauge("bGauge", "bGaugeValue", state.baseHpB, maxBaseHp);
-        drawBaseHpGauge("aGauge", "aGaugeValue", state.baseHpA, maxBaseHp, getRepairStatusText(state.repairQueueA));
+        const displayBaseHpB = state.baseHpDisplayB;
+        const displayBaseHpA = state.baseHpDisplayA;
+        drawBaseHpGauge("bGauge", "bGaugeValue", displayBaseHpB, maxBaseHp);
+        drawBaseHpGauge("aGauge", "aGaugeValue", displayBaseHpA, maxBaseHp, getRepairStatusText(state.repairQueueA));
         drawMap();
+        const layout = {
+          cols: map[0].length,
+          rows: map.length,
+          cellSize: Math.floor(Math.min(canvas.width / map[0].length, canvas.height / map.length)),
+          mapWidth: Math.floor(Math.min(canvas.width / map[0].length, canvas.height / map.length)) * map[0].length,
+          mapHeight: Math.floor(Math.min(canvas.width / map[0].length, canvas.height / map.length)) * map.length,
+          mapX: Math.floor((canvas.width - Math.floor(Math.min(canvas.width / map[0].length, canvas.height / map.length)) * map[0].length) / 2),
+          mapY: 0,
+        };
+        const visibleCountB = state.isUnitDeltaAnimating ? state.unitDisplayCountB : getActiveUnitCount("B");
+        const visibleCountA = state.isUnitDeltaAnimating ? state.unitDisplayCountA : getActiveUnitCount("A");
+        drawAbstractPieces(layout, "B", visibleCountB, state.unitDeltaPulse);
+        drawAbstractPieces(layout, "A", visibleCountA, state.unitDeltaPulse);
+        drawFrontlineGauge(layout, "B", state.displayedAttackPowerRateB);
+        drawFrontlineGauge(layout, "A", state.displayedAttackPowerRateA);
+        drawRepairGauge(layout, "B", state.displayedRepairRateB);
+        drawRepairGauge(layout, "A", state.displayedRepairRateA);
+        drawBaseHpBadge(layout, "B", displayBaseHpB, maxBaseHp);
+        drawBaseHpBadge(layout, "A", displayBaseHpA, maxBaseHp);
       }
 
       function getCommandDamage(commandId) {
         switch (commandId) {
           case "A.中央突破":
-            return { damageA: 3000, damageB: 2000 };
+            return {
+              baseDamageDealt: 2500,
+              frontlineDamageDealt: 500,
+              baseDamageReceived: 1500,
+              frontlineDamageReceived: 3500,
+            };
           case "B.側面展開":
-            return { damageA: 500, damageB: 1000 };
+            return {
+              baseDamageDealt: 1000,
+              frontlineDamageDealt: 3000,
+              baseDamageReceived: 500,
+              frontlineDamageReceived: 1500,
+            };
           case "C.迎撃対応":
-            return { damageA: 200, damageB: 600 };
+            return {
+              baseDamageDealt: 500,
+              frontlineDamageDealt: 1500,
+              baseDamageReceived: 500,
+              frontlineDamageReceived: 500,
+            };
           default:
-            return { damageA: 0, damageB: 0 };
+            return {
+              baseDamageDealt: 0,
+              frontlineDamageDealt: 0,
+              baseDamageReceived: 0,
+              frontlineDamageReceived: 0,
+            };
         }
       }
 
@@ -467,6 +1198,268 @@
         });
       }
 
+      function getIntroBriefingLines() {
+        return [
+          "🫡 司令、戦況はすでに最終局面にあります。",
+          "味方チームは敵本陣目前まで前線を押し上げました。",
+          "しかし、味方も安全ではありません。",
+          "司令には3つの作戦を提案いたします。",
+          "A. 💥 中央突破",
+          "敵本陣へ大きな打撃を狙います。",
+          "ただし、味方前線の損耗も大きくなります。",
+          "B. ⚡️ 側面展開",
+          "敵前線へ圧力をかけ、敵チームの再投入資源を削りつつ、前線枚数差の有利を作ります。",
+          "ただし、こちらも少なからず被害を受けます。",
+          "C. 💧 迎撃対応",
+          "味方の損耗を抑えながら、戦線を整えます。",
+          "修理負荷が高い時は有効だと思われます。",
+          "10ラウンド以内に勝利へ導いてください。",
+          "勝利を掴み取りましょう、司令。🔥",
+        ];
+      }
+
+      function showIntroBriefing() {
+        const overlay = document.getElementById("introOverlay");
+        const body = document.getElementById("introBody");
+        body.innerHTML = getIntroBriefingLines().map((line) => `<div>${line}</div>`).join("");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        state.isIntroBriefingOpen = true;
+        setCommandButtonsEnabled(false);
+      }
+
+      function hideIntroBriefing() {
+        const overlay = document.getElementById("introOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        state.isIntroBriefingOpen = false;
+        if (!state.result && !state.isConfirmMode) {
+          setCommandButtonsEnabled(true);
+        }
+      }
+
+      function getBattleSnapshot() {
+        const activeA = getActiveUnitCount("A");
+        const activeB = getActiveUnitCount("B");
+        const repairingUnitsA = state.repairQueueA.length;
+        const repairingUnitsB = state.repairQueueB.length;
+        const repairLoadA = getRepairLoad(state.repairQueueA);
+        const repairLoadB = getRepairLoad(state.repairQueueB);
+        return {
+          baseHpA: state.baseHpA,
+          baseHpB: state.baseHpB,
+          activeUnitsA: activeA,
+          activeUnitsB: activeB,
+          repairingUnitsA,
+          repairingUnitsB,
+          repairLoadA,
+          repairLoadB,
+        };
+      }
+
+      function getBattleRatesFromSnapshot(snapshot) {
+        return {
+          attackPowerRateA: maxUnitsA > 0 ? snapshot.activeUnitsA / maxUnitsA : 0,
+          attackPowerRateB: maxUnitsB > 0 ? snapshot.activeUnitsB / maxUnitsB : 0,
+          repairRateA: Math.max(0, Math.min(1, snapshot.repairLoadA / REPAIR_GAUGE_DISPLAY_MAX)),
+          repairRateB: Math.max(0, Math.min(1, snapshot.repairLoadB / REPAIR_GAUGE_DISPLAY_MAX)),
+        };
+      }
+
+      function syncDisplayedBattleState(snapshot) {
+        const rates = getBattleRatesFromSnapshot(snapshot);
+        state.displayedAttackPowerRateA = rates.attackPowerRateA;
+        state.displayedAttackPowerRateB = rates.attackPowerRateB;
+        state.displayedRepairRateA = rates.repairRateA;
+        state.displayedRepairRateB = rates.repairRateB;
+      }
+
+      function classifyMagnitude(value, smallThreshold, mediumThreshold) {
+        if (value <= 0) {
+          return "none";
+        }
+        if (value < smallThreshold) {
+          return "small";
+        }
+        if (value < mediumThreshold) {
+          return "medium";
+        }
+        return "large";
+      }
+
+      function describeBaseDamage(side, damage) {
+        const magnitude = classifyMagnitude(damage, 1000, 2000);
+        if (magnitude === "none") {
+          return "";
+        }
+        if (side === "enemy") {
+          if (magnitude === "small") return "敵本陣への打撃はまだ限定的です。";
+          if (magnitude === "medium") return "敵本陣へ着実に損傷を与えています。";
+          return "敵本陣へ大きな損傷を与えました。";
+        }
+        if (magnitude === "small") return "味方本陣への被害は軽微です。";
+        if (magnitude === "medium") return "味方本陣にも無視できない被害が出ています。";
+        return "味方本陣が大きく削られています。";
+      }
+
+      function describeActiveLoss(side, loss) {
+        const magnitude = classifyMagnitude(loss, 1, 2);
+        if (magnitude === "none") {
+          return "";
+        }
+        if (side === "enemy") {
+          if (magnitude === "small") return "敵前線の攻撃力を少し落としました。";
+          if (magnitude === "medium") return "敵前線の攻撃力をはっきり低下させています。";
+          return "敵前線の攻撃力を大きく落としました。";
+        }
+        if (magnitude === "small") return "味方前線の攻撃力が少し低下しています。";
+        if (magnitude === "medium") return "味方前線の攻撃力が無視できない程度に低下しています。";
+        return "味方前線の攻撃力が大きく低下しています。";
+      }
+
+      function describeRepairLoad(side, delta) {
+        const magnitude = classifyMagnitude(delta, 3, 6);
+        if (magnitude === "none") {
+          return "";
+        }
+        if (side === "enemy") {
+          if (magnitude === "small") return "敵の修理負荷が少し増えています。";
+          if (magnitude === "medium") return "敵の修理負荷が重くなっています。";
+          return "敵の修理負荷が大きく膨らんでいます。";
+        }
+        if (magnitude === "small") return "味方の修理負荷が少し増えています。";
+        if (magnitude === "medium") return "味方の修理負荷が重くなっています。";
+        return "味方の修理負荷が深刻です。";
+      }
+
+      function describeRecovery(side, count) {
+        const magnitude = classifyMagnitude(count, 2, 3);
+        if (magnitude === "none") {
+          return "";
+        }
+        if (side === "enemy") {
+          if (magnitude === "small") return "敵にも一部復帰機が出ています。";
+          if (magnitude === "medium") return "敵前線にも復帰機が戻りつつあります。";
+          return "敵前線は大きく復旧しています。";
+        }
+        if (magnitude === "small") return "修理完了機が一部、前線へ復帰しました。";
+        if (magnitude === "medium") return "修理完了機が前線へ戻り、立て直しが進んでいます。";
+        return "多くの修理完了機が復帰し、前線が大きく回復しました。";
+      }
+
+      function describeActiveBalance(activeDiff) {
+        const diff = Math.abs(activeDiff);
+        if (diff === 0) {
+          return "前線は拮抗しています。";
+        }
+        const magnitude = classifyMagnitude(diff, 2, 4);
+        if (activeDiff > 0) {
+          if (magnitude === "small") return "前線はわずかに優位です。";
+          if (magnitude === "medium") return "前線優位を作れています。";
+          return "前線で大きな優位を取れています。";
+        }
+        if (magnitude === "small") return "前線はやや押されています。";
+        if (magnitude === "medium") return "前線は不利に傾いています。";
+        return "前線は大きく押し込まれています。";
+      }
+
+      function buildRoundReport(commandId, before, after, recovered) {
+        const damageToEnemyBase = Math.max(0, before.baseHpB - after.baseHpB);
+        const damageToAllyBase = Math.max(0, before.baseHpA - after.baseHpA);
+        const enemyActiveLoss = Math.max(0, before.activeUnitsB - after.activeUnitsB);
+        const allyActiveLoss = Math.max(0, before.activeUnitsA - after.activeUnitsA);
+        const enemyRepairLoadDelta = after.repairLoadB - before.repairLoadB;
+        const allyRepairLoadDelta = after.repairLoadA - before.repairLoadA;
+        const enemyRecoveredCount = recovered.B;
+        const allyRecoveredCount = recovered.A;
+        const activeDiff = after.activeUnitsA - after.activeUnitsB;
+        const lines = [];
+
+        const enemyBaseLine = describeBaseDamage("enemy", damageToEnemyBase);
+        const allyBaseLine = describeBaseDamage("ally", damageToAllyBase);
+        if (enemyBaseLine) lines.push(enemyBaseLine);
+        if (allyBaseLine) lines.push(allyBaseLine);
+
+        const enemyActiveLine = describeActiveLoss("enemy", enemyActiveLoss);
+        const allyActiveLine = describeActiveLoss("ally", allyActiveLoss);
+        if (enemyActiveLine) lines.push(enemyActiveLine);
+        if (allyActiveLine) lines.push(allyActiveLine);
+
+        const enemyRepairLine = describeRepairLoad("enemy", enemyRepairLoadDelta);
+        const allyRepairLine = describeRepairLoad("ally", allyRepairLoadDelta);
+        if (enemyRepairLine) lines.push(enemyRepairLine);
+        if (allyRepairLine) lines.push(allyRepairLine);
+
+        const enemyRecoveryLine = describeRecovery("enemy", enemyRecoveredCount);
+        const allyRecoveryLine = describeRecovery("ally", allyRecoveredCount);
+        if (enemyRecoveryLine) lines.push(enemyRecoveryLine);
+        if (allyRecoveryLine) lines.push(allyRecoveryLine);
+
+        lines.push(describeActiveBalance(activeDiff));
+
+        const trimmed = lines.slice(0, 5);
+        return {
+          round: before.round + 1,
+          commandLabel: commandId,
+          bodyLines: trimmed,
+        };
+      }
+
+      function showRoundReport(report) {
+        const overlay = document.getElementById("roundReportOverlay");
+        document.getElementById("roundReportTitle").textContent = `ROUND ${report.round} 戦況レポート`;
+        document.getElementById("roundReportCommand").textContent = `前回作戦: ${report.commandLabel}`;
+        document.getElementById("roundReportBody").innerHTML = report.bodyLines.map((line) => `<div>${line}</div>`).join("");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        state.lastRoundReport = report;
+        state.isRoundReportOpen = true;
+        setCommandButtonsEnabled(false);
+      }
+
+      function hideRoundReport() {
+        const overlay = document.getElementById("roundReportOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        document.getElementById("roundReportTitle").textContent = "";
+        document.getElementById("roundReportCommand").textContent = "";
+        document.getElementById("roundReportBody").innerHTML = "";
+        state.isRoundReportOpen = false;
+        if (state.pendingRoundAdvance && !state.result) {
+          state.round = Math.min(state.round + 1, maxRound);
+        }
+        state.pendingRoundAdvance = false;
+        if (!state.result && !state.isConfirmMode && !state.isIntroBriefingOpen) {
+          setCommandButtonsEnabled(true);
+        }
+      }
+
+      function showOperationConfirm(commandId) {
+        if (state.result || state.isIntroBriefingOpen || state.isRoundReportOpen) return;
+        const overlay = document.getElementById("operationConfirmOverlay");
+        document.getElementById("confirmCommand").textContent = commandId;
+        document.getElementById("confirmBody").innerHTML = getCommandPreviewReport(commandId)
+          .split("<br />")
+          .map((line) => `<div>${line}</div>`)
+          .join("");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        state.pendingCommand = commandId;
+        state.isConfirmMode = true;
+        setCommandButtonsEnabled(false);
+      }
+
+      function hideOperationConfirm() {
+        const overlay = document.getElementById("operationConfirmOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        document.getElementById("confirmCommand").textContent = "";
+        document.getElementById("confirmBody").innerHTML = "";
+        state.pendingCommand = null;
+        state.isConfirmMode = false;
+        setCommandButtonsEnabled(true);
+      }
+
       function getActiveUnitCount(team) {
         return team === "A" ? maxUnitsA - state.repairQueueA.length : maxUnitsB - state.repairQueueB.length;
       }
@@ -482,10 +1475,205 @@
         return name;
       }
 
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function waitPhase(ms) {
+        const token = ++state.phaseWaitToken;
+        state.isPhaseWaiting = true;
+        setCommandButtonsEnabled(false);
+        await sleep(ms);
+        if (token !== state.phaseWaitToken) {
+          return false;
+        }
+        state.isPhaseWaiting = false;
+        if (!state.result && !state.isConfirmMode && !state.isIntroBriefingOpen && !state.isRoundReportOpen && !state.isUnitDeltaAnimating && !state.isBaseHpAnimating) {
+          setCommandButtonsEnabled(true);
+        }
+        return true;
+      }
+
+      function buildInterleavedTeams(countA, countB) {
+        const order = [];
+        let remainingA = countA;
+        let remainingB = countB;
+        let lastTeam = null;
+        while (remainingA > 0 || remainingB > 0) {
+          let nextTeam = null;
+          if (remainingA > 0 && remainingB > 0) {
+            if (lastTeam === "A") {
+              nextTeam = "B";
+            } else if (lastTeam === "B") {
+              nextTeam = "A";
+            } else {
+              nextTeam = remainingA >= remainingB ? "A" : "B";
+            }
+          } else if (remainingA > 0) {
+            nextTeam = "A";
+          } else {
+            nextTeam = "B";
+          }
+          order.push(nextTeam);
+          if (nextTeam === "A") {
+            remainingA -= 1;
+          } else {
+            remainingB -= 1;
+          }
+          lastTeam = nextTeam;
+        }
+        return order;
+      }
+
+      async function playUnitDeltaAnimation(before, after) {
+        const removeA = Math.max(0, before.activeUnitsA - after.activeUnitsA);
+        const removeB = Math.max(0, before.activeUnitsB - after.activeUnitsB);
+        const addA = Math.max(0, after.activeUnitsA - before.activeUnitsA);
+        const addB = Math.max(0, after.activeUnitsB - before.activeUnitsB);
+        const token = ++state.unitDeltaAnimationToken;
+
+        state.isUnitDeltaAnimating = true;
+        state.unitDisplayCountA = before.activeUnitsA;
+        state.unitDisplayCountB = before.activeUnitsB;
+        state.unitDeltaPulse = null;
+        setCommandButtonsEnabled(false);
+        render();
+
+        const runStep = async (team, mode) => {
+          if (token !== state.unitDeltaAnimationToken) return false;
+          const currentCount = team === "A" ? state.unitDisplayCountA : state.unitDisplayCountB;
+          const maxUnits = team === "A" ? maxUnitsA : maxUnitsB;
+          const slotNumber = mode === "remove"
+            ? maxUnits - currentCount + 1
+            : maxUnits - currentCount;
+          if (slotNumber < 1 || slotNumber > maxUnits) return true;
+          if (mode === "remove") {
+            state.unitDeltaPulse = { team, slotNumber, mode };
+            render();
+            await sleep(120);
+            if (token !== state.unitDeltaAnimationToken) return false;
+            if (team === "A") {
+              state.unitDisplayCountA = Math.max(0, state.unitDisplayCountA - 1);
+            } else {
+              state.unitDisplayCountB = Math.max(0, state.unitDisplayCountB - 1);
+            }
+            render();
+            await sleep(90);
+          } else {
+            if (team === "A") {
+              state.unitDisplayCountA = Math.min(maxUnitsA, state.unitDisplayCountA + 1);
+            } else {
+              state.unitDisplayCountB = Math.min(maxUnitsB, state.unitDisplayCountB + 1);
+            }
+            state.unitDeltaPulse = { team, slotNumber, mode };
+            render();
+            await sleep(120);
+            if (token !== state.unitDeltaAnimationToken) return false;
+          }
+          state.unitDeltaPulse = null;
+          render();
+          await sleep(40);
+          return true;
+        };
+
+        const removalOrder = buildInterleavedTeams(removeA, removeB);
+        for (const team of removalOrder) {
+          const ok = await runStep(team, "remove");
+          if (!ok || token !== state.unitDeltaAnimationToken) break;
+        }
+
+        const additionOrder = buildInterleavedTeams(addA, addB);
+        for (const team of additionOrder) {
+          const ok = await runStep(team, "add");
+          if (!ok || token !== state.unitDeltaAnimationToken) break;
+        }
+
+        state.unitDeltaPulse = null;
+        state.unitDisplayCountA = after.activeUnitsA;
+        state.unitDisplayCountB = after.activeUnitsB;
+        state.isUnitDeltaAnimating = false;
+        render();
+      }
+
+      function animateBattleGaugePair(before, after, token, duration) {
+        const start = performance.now();
+        return new Promise((resolve) => {
+          const step = (now) => {
+            if (token !== state.gaugeAnimationToken) {
+              resolve(false);
+              return;
+            }
+            const elapsed = Math.max(0, now - start);
+            const t = Math.min(1, elapsed / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            state.baseHpDisplayA = Math.round(before.baseHpA + (after.baseHpA - before.baseHpA) * eased);
+            state.baseHpDisplayB = Math.round(before.baseHpB + (after.baseHpB - before.baseHpB) * eased);
+            state.displayedAttackPowerRateA = before.attackPowerRateA + (after.attackPowerRateA - before.attackPowerRateA) * eased;
+            state.displayedAttackPowerRateB = before.attackPowerRateB + (after.attackPowerRateB - before.attackPowerRateB) * eased;
+            state.displayedRepairRateA = before.repairRateA + (after.repairRateA - before.repairRateA) * eased;
+            state.displayedRepairRateB = before.repairRateB + (after.repairRateB - before.repairRateB) * eased;
+            render();
+            if (t < 1) {
+              requestAnimationFrame(step);
+              return;
+            }
+            resolve(true);
+          };
+          requestAnimationFrame(step);
+        });
+      }
+
+      async function playBattleGaugeAnimation(before, after) {
+        const token = ++state.gaugeAnimationToken;
+        const changed =
+          before.baseHpA !== after.baseHpA ||
+          before.baseHpB !== after.baseHpB ||
+          before.attackPowerRateA !== after.attackPowerRateA ||
+          before.attackPowerRateB !== after.attackPowerRateB ||
+          before.repairRateA !== after.repairRateA ||
+          before.repairRateB !== after.repairRateB;
+
+        state.isBaseHpAnimating = true;
+        state.baseHpDisplayA = before.baseHpA;
+        state.baseHpDisplayB = before.baseHpB;
+        state.displayedAttackPowerRateA = before.attackPowerRateA;
+        state.displayedAttackPowerRateB = before.attackPowerRateB;
+        state.displayedRepairRateA = before.repairRateA;
+        state.displayedRepairRateB = before.repairRateB;
+        setCommandButtonsEnabled(false);
+        render();
+
+        if (!changed) {
+          state.baseHpDisplayA = after.baseHpA;
+          state.baseHpDisplayB = after.baseHpB;
+          state.displayedAttackPowerRateA = after.attackPowerRateA;
+          state.displayedAttackPowerRateB = after.attackPowerRateB;
+          state.displayedRepairRateA = after.repairRateA;
+          state.displayedRepairRateB = after.repairRateB;
+          state.isBaseHpAnimating = false;
+          render();
+          return true;
+        }
+
+        const ok = await animateBattleGaugePair(before, after, token, 400);
+        if (!ok || token !== state.gaugeAnimationToken) {
+          return false;
+        }
+
+        state.baseHpDisplayA = after.baseHpA;
+        state.baseHpDisplayB = after.baseHpB;
+        state.displayedAttackPowerRateA = after.attackPowerRateA;
+        state.displayedAttackPowerRateB = after.attackPowerRateB;
+        state.displayedRepairRateA = after.repairRateA;
+        state.displayedRepairRateB = after.repairRateB;
+        state.isBaseHpAnimating = false;
+        render();
+        return true;
+      }
+
       function addRepairsFromDamage(team, damageAmount) {
         const damagePoolKey = team === "A" ? "damagePoolA" : "damagePoolB";
         const queueKey = team === "A" ? "repairQueueA" : "repairQueueB";
-        const maxUnits = team === "A" ? maxUnitsA : maxUnitsB;
         state[damagePoolKey] += damageAmount;
         resolveRepairPool(team);
       }
@@ -494,29 +1682,39 @@
         const damagePoolKey = team === "A" ? "damagePoolA" : "damagePoolB";
         const queueKey = team === "A" ? "repairQueueA" : "repairQueueB";
         const maxUnits = team === "A" ? maxUnitsA : maxUnitsB;
-        while (state[damagePoolKey] >= 1000 && state[queueKey].length < maxUnits) {
-          state[damagePoolKey] -= 1000;
+        while (state[damagePoolKey] >= FRONTLINE_DAMAGE_PER_CASUALTY && state[queueKey].length < maxUnits) {
+          state[damagePoolKey] -= FRONTLINE_DAMAGE_PER_CASUALTY;
           state[queueKey].push({ name: getNextRepairUnitName(team), timer: 3 });
         }
       }
 
       function advanceRepairQueues() {
+        const recovered = { A: 0, B: 0 };
         for (const queue of [state.repairQueueA, state.repairQueueB]) {
           for (let i = queue.length - 1; i >= 0; i--) {
             queue[i].timer -= 1;
             if (queue[i].timer <= 0) {
+              if (queue === state.repairQueueA) {
+                recovered.A += 1;
+              } else {
+                recovered.B += 1;
+              }
               queue.splice(i, 1);
             }
           }
         }
         resolveRepairPool("A");
         resolveRepairPool("B");
+        return recovered;
       }
 
       function showResult() {
         const resultOverlay = document.getElementById("resultOverlay");
         const resultTitle = document.getElementById("resultTitle");
         const resultSubtitle = document.getElementById("resultSubtitle");
+        const resultRound = document.getElementById("resultRound");
+        const resultEnemyHp = document.getElementById("resultEnemyHp");
+        const resultAllyHp = document.getElementById("resultAllyHp");
         const resultHistory = document.getElementById("resultHistory");
         resultOverlay.classList.add("show");
         resultOverlay.setAttribute("aria-hidden", "false");
@@ -528,7 +1726,30 @@
         } else {
           resultSubtitle.textContent = "戦線膠着";
         }
+        resultRound.textContent = `Round ${Math.min(state.round, maxRound)} / ${maxRound}`;
+        resultEnemyHp.textContent = `敵HP ${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayB))} / ${maxBaseHp}`;
+        resultAllyHp.textContent = `味方HP ${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayA))} / ${maxBaseHp}`;
         resultHistory.textContent = `作戦履歴: ${state.commandHistory.length ? state.commandHistory.join(" ") : "なし"}`;
+        hideOperationConfirm();
+        hideIntroBriefing();
+        hideRoundReport();
+        state.pendingResult = null;
+        state.pendingRoundAdvance = false;
+      }
+
+      function cancelBattleAnimations() {
+        state.unitDeltaAnimationToken += 1;
+        state.gaugeAnimationToken += 1;
+        state.phaseWaitToken += 1;
+        state.isUnitDeltaAnimating = false;
+        state.isBaseHpAnimating = false;
+        state.isPhaseWaiting = false;
+        state.unitDeltaPulse = null;
+        state.unitDisplayCountA = getActiveUnitCount("A");
+        state.unitDisplayCountB = getActiveUnitCount("B");
+        state.baseHpDisplayA = state.baseHpA;
+        state.baseHpDisplayB = state.baseHpB;
+        syncDisplayedBattleState(getBattleSnapshot());
       }
 
       function resetGame() {
@@ -543,58 +1764,158 @@
         state.damagePoolB = 0;
         state.nextRepairUnitIndexA = 0;
         state.nextRepairUnitIndexB = 0;
+        state.pendingCommand = null;
+        state.pendingResult = null;
+        state.pendingRoundAdvance = false;
+        state.isConfirmMode = false;
+        state.isIntroBriefingOpen = true;
+        state.lastRoundReport = null;
+        state.isRoundReportOpen = false;
+        state.isUnitDeltaAnimating = false;
+        state.isPhaseWaiting = false;
+        state.unitDeltaPulse = null;
+        state.unitDisplayCountA = maxUnitsA;
+        state.unitDisplayCountB = maxUnitsB;
+        state.baseHpDisplayA = maxBaseHp;
+        state.baseHpDisplayB = maxBaseHp;
+        state.unitDeltaAnimationToken += 1;
+        state.gaugeAnimationToken += 1;
+        state.phaseWaitToken += 1;
+        state.isBaseHpAnimating = false;
+        state.displayedAttackPowerRateA = 1;
+        state.displayedAttackPowerRateB = 1;
+        state.displayedRepairRateA = 0;
+        state.displayedRepairRateB = 0;
+        hideOperationConfirm();
+        hideIntroBriefing();
+        hideRoundReport();
         document.getElementById("resultOverlay").classList.remove("show");
         document.getElementById("resultOverlay").setAttribute("aria-hidden", "true");
         document.getElementById("resultTitle").textContent = "";
         document.getElementById("resultSubtitle").textContent = "";
+        document.getElementById("resultRound").textContent = "";
+        document.getElementById("resultEnemyHp").textContent = "";
+        document.getElementById("resultAllyHp").textContent = "";
         document.getElementById("resultHistory").textContent = "";
         document.getElementById("operator").innerHTML = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
         setCommandButtonsEnabled(true);
         render();
+        showIntroBriefing();
       }
 
-      function handleCommand(commandId) {
+      async function executeCommand(commandId) {
         if (state.result) return;
 
+        const before = {
+          round: state.round,
+          ...getBattleSnapshot(),
+        };
+        const beforeRates = getBattleRatesFromSnapshot(before);
+        state.baseHpDisplayA = before.baseHpA;
+        state.baseHpDisplayB = before.baseHpB;
+        state.displayedAttackPowerRateA = beforeRates.attackPowerRateA;
+        state.displayedAttackPowerRateB = beforeRates.attackPowerRateB;
+        state.displayedRepairRateA = beforeRates.repairRateA;
+        state.displayedRepairRateB = beforeRates.repairRateB;
         state.commandHistory.push(commandId[0]);
 
         const chosenDamage = getCommandDamage(commandId);
         const activeA = getActiveUnitCount("A");
         const activeB = getActiveUnitCount("B");
-        const actualDamageA = Math.round(chosenDamage.damageA * (activeB / maxUnitsB));
-        const actualDamageB = Math.round(chosenDamage.damageB * (activeA / maxUnitsA));
+        // Base damage affects base HP.
+        // Frontline damage affects casualty / repair pressure.
+        const effectiveBaseDamageReceived = Math.round(chosenDamage.baseDamageReceived * (activeB / maxUnitsB));
+        const effectiveBaseDamageDealt = Math.round(chosenDamage.baseDamageDealt * (activeA / maxUnitsA));
+        const effectiveFrontlineDamageReceived = Math.round(chosenDamage.frontlineDamageReceived * (activeB / maxUnitsB));
+        const effectiveFrontlineDamageDealt = Math.round(chosenDamage.frontlineDamageDealt * (activeA / maxUnitsA));
 
-        state.baseHpA = Math.max(0, state.baseHpA - actualDamageA);
-        state.baseHpB = Math.max(0, state.baseHpB - actualDamageB);
-        addRepairsFromDamage("A", actualDamageA);
-        addRepairsFromDamage("B", actualDamageB);
-        advanceRepairQueues();
-
-        if (judgeResult()) {
-          render();
-          setCommandButtonsEnabled(false);
-          showResult();
-          return;
-        }
-
-        if (state.round >= maxRound) {
+        state.baseHpA = Math.max(0, state.baseHpA - effectiveBaseDamageReceived);
+        state.baseHpB = Math.max(0, state.baseHpB - effectiveBaseDamageDealt);
+        addRepairsFromDamage("A", effectiveFrontlineDamageReceived);
+        addRepairsFromDamage("B", effectiveFrontlineDamageDealt);
+        const recovered = advanceRepairQueues();
+        const after = {
+          round: state.round,
+          ...getBattleSnapshot(),
+        };
+        const afterRates = getBattleRatesFromSnapshot(after);
+        const report = buildRoundReport(commandId, before, after, recovered);
+        const hasUnitDelta = before.activeUnitsA !== after.activeUnitsA || before.activeUnitsB !== after.activeUnitsB;
+        const resultReached = judgeResult() || state.round >= maxRound;
+        if (resultReached && !state.result) {
           finalizeByHp();
-          render();
-          setCommandButtonsEnabled(false);
+        }
+        if (resultReached) {
+          state.pendingResult = state.result;
+          state.lastRoundReport = null;
+          state.isRoundReportOpen = false;
+          state.pendingRoundAdvance = false;
+        } else {
+          state.pendingRoundAdvance = true;
+        }
+
+        if (!(await waitPhase(400))) return;
+
+        if (hasUnitDelta) {
+          await playUnitDeltaAnimation(before, after);
+        }
+
+        if (!(await waitPhase(500))) return;
+
+        const gaugeBefore = { ...beforeRates, baseHpA: before.baseHpA, baseHpB: before.baseHpB };
+        const gaugeAfter = { ...afterRates, baseHpA: after.baseHpA, baseHpB: after.baseHpB };
+        if (!(await playBattleGaugeAnimation(gaugeBefore, gaugeAfter))) return;
+
+        if (!(await waitPhase(600))) return;
+
+        if (state.pendingResult) {
           showResult();
           return;
         }
 
-        state.round += 1;
-        render();
+        showRoundReport(report);
+      }
+
+      function handleCommand(commandId) {
+        if (state.result || state.isConfirmMode || state.isIntroBriefingOpen || state.isRoundReportOpen || state.isUnitDeltaAnimating || state.isBaseHpAnimating || state.isPhaseWaiting) return;
+        showOperationConfirm(commandId);
+      }
+
+      function handleConfirmAction(action) {
+        if (!state.isConfirmMode) return;
+        if (action === "confirm") {
+          const pending = state.pendingCommand;
+          hideOperationConfirm();
+          if (pending) {
+            executeCommand(pending);
+          }
+          return;
+        }
+
+        if (action === "cancel") {
+          hideOperationConfirm();
+          render();
+        }
       }
 
       document.querySelectorAll("button[data-command]").forEach((button) => {
         button.addEventListener("click", () => handleCommand(button.dataset.command));
       });
 
-      document.getElementById("restartButton").addEventListener("click", resetGame);
+      document.getElementById("confirmYesButton").addEventListener("click", () => handleConfirmAction("confirm"));
+      document.getElementById("confirmNoButton").addEventListener("click", () => handleConfirmAction("cancel"));
 
+      document.getElementById("restartButton").addEventListener("click", resetGame);
+      document.getElementById("introOkButton").addEventListener("click", () => {
+        hideIntroBriefing();
+        render();
+      });
+      document.getElementById("roundReportOkButton").addEventListener("click", () => {
+        hideRoundReport();
+        render();
+      });
+
+      showIntroBriefing();
       render();
     </script>
   </body>
