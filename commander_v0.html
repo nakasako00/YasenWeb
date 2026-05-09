@@ -249,33 +249,6 @@
         transform: translateY(1px);
       }
 
-      button[data-command="A.中央突破"] {
-        background: linear-gradient(180deg, #fee2e2 0%, #fecaca 100%);
-        border-color: #f87171;
-        color: #7f1d1d;
-      }
-
-      button[data-command="B.側面展開"] {
-        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
-        border-color: #fbbf24;
-        color: #78350f;
-      }
-
-      button[data-command="C.迎撃対応"] {
-        background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
-        border-color: #60a5fa;
-        color: #1e3a8a;
-      }
-
-      button[data-command]:hover {
-        filter: brightness(1.02);
-      }
-
-      button[data-command]:active {
-        transform: translateY(1px);
-        filter: brightness(0.98);
-      }
-
       .selection {
         min-height: 0;
         font-size: 13px;
@@ -784,7 +757,7 @@
         result: null,
         pendingCommand: null,
         isConfirmMode: false,
-        isIntroBriefingOpen: true,
+        isIntroBriefingOpen: false,
         lastRoundReport: null,
         isRoundReportOpen: false,
         pendingResult: null,
@@ -916,7 +889,7 @@
         const button = document.getElementById("reportReopenButton");
         if (!button) return;
         const isRound1 = Math.min(state.round, maxRound) <= 1;
-        button.textContent = isRound1 ? "📋 ブリーフィング" : "📊 再確認";
+        button.textContent = isRound1 ? "📋 再確認" : "📊 レポート";
       }
 
       function getCommandPreviewReport(commandId) {
@@ -924,20 +897,20 @@
           case "A.中央突破":
             return [
               "中央突破を実行します。",
-              "敵本陣へ大きな打撃が見込めます。",
-              "ただし味方前線の損耗も大きくなります。",
+              "敵本陣へ大打撃を狙う決戦作戦です。",
+              "自軍前線の損耗も大きくなります。",
             ].join("<br />");
           case "B.側面展開":
             return [
               "側面展開を実行します。",
-              "敵前線への打撃が見込めます。",
-              "敵の再投入資源へ圧力をかけます。",
+              "敵前線を削り、枚数有利を作る基本作戦です。",
+              "前線の主導権を取りに行きます。",
             ].join("<br />");
           case "C.迎撃対応":
             return [
               "迎撃対応を実行します。",
-              "味方の損耗を抑えやすい作戦です。",
-              "ただし敵本陣への打撃は限定的です。",
+              "本陣への被害を受け入れつつ、前線維持を優先する迎撃作戦です。",
+              "敵前線を削り、崩壊を遅らせます。",
             ].join("<br />");
           default:
             return "作戦内容を確認してください。";
@@ -1341,14 +1314,14 @@
           "司令には3つの作戦を提案いたします。",
           "◆━━━━━━━━━━━━━━━━━━━━◆",
           "A. 💥 中央突破",
-          "敵本陣へ大きな打撃を狙います。",
-          "ただし、味方前線の損耗も大きくなります。",
+          "敵本陣へ大打撃を狙う決戦作戦です。",
+          "自軍前線の損耗も大きくなります。",
           "B. ⚡️ 側面展開",
-          "敵前線へ圧力をかけ、敵チームの再投入資源を削りつつ、前線枚数差の有利を作ります。",
-          "ただし、こちらも少なからず被害を受けます。",
+          "敵前線を削り、枚数有利を作る基本作戦です。",
+          "前線の主導権を取りに行きます。",
           "C. 💧 迎撃対応",
-          "味方の損耗を抑えながら、戦線を整えます。",
-          "修理負荷が高い時は有効だと思われます。",
+          "本陣への被害を受け入れつつ、前線維持を優先する迎撃作戦です。",
+          "敵前線を削り、崩壊を遅らせます。",
           "◆━━━━━━━━━━━━━━━━━━━━◆",
           "10ラウンド以内に勝利へ導いてください。",
           "栄光を掴み取りましょう、司令。👊",
@@ -1442,6 +1415,22 @@
         return "変化なし";
       }
 
+      function diffSymbol(value, thresholds = { micro: 1, small: 2, medium: 3 }) {
+        if (value === 0) return "変化なし";
+        const severity = classifySeverity(Math.abs(value), thresholds);
+        if (severity === "none") return "変化なし";
+        if (value > 0) {
+          if (severity === "micro") return "↗︎";
+          if (severity === "small") return "↑";
+          if (severity === "medium") return "↑↑";
+          return "↑↑↑";
+        }
+        if (severity === "micro") return "↘︎";
+        if (severity === "small") return "↓";
+        if (severity === "medium") return "↓↓";
+        return "↓↓↓";
+      }
+
       function makeReportLine(emoji, label, direction, value, thresholds, includeNone = false) {
         const severity = classifySeverity(value, thresholds);
         if (severity === "none" && !includeNone) {
@@ -1480,17 +1469,18 @@
         const enemyRecoveredCount = recovered.B;
         const allyRecoveredCount = recovered.A;
         const activeDiff = after.activeUnitsA - after.activeUnitsB;
+        const activeDiffDelta = activeDiff - (before.activeUnitsA - before.activeUnitsB);
 
         const lines = [
-          frontlineDiffLine(activeDiff).text,
-          makeReportLine("🛡️", "味方本陣耐久", "down", damageToAllyBase, { micro: 499, small: 999, medium: 1999 }, true).text,
-          makeReportLine("💥", "敵本陣耐久", "down", damageToEnemyBase, { micro: 499, small: 999, medium: 1999 }, true).text,
-          makeReportLine("⚔️", "味方前線攻撃力", allyActiveLoss > 0 ? "down" : "up", allyActiveLoss, { micro: 1, small: 2, medium: 3 }, true).text,
-          makeReportLine("⚔️", "敵前線攻撃力", enemyActiveLoss > 0 ? "down" : "up", enemyActiveLoss, { micro: 1, small: 2, medium: 3 }, true).text,
-          makeReportLine("🔧", "味方修理負荷", allyRepairLoadDelta > 0 ? "up" : "down", Math.abs(allyRepairLoadDelta), { micro: 1, small: 2, medium: 5 }, true).text,
-          makeReportLine("🔧", "敵修理負荷", enemyRepairLoadDelta > 0 ? "up" : "down", Math.abs(enemyRepairLoadDelta), { micro: 1, small: 2, medium: 5 }, true).text,
-          makeReportLine("✅", "味方復帰", "up", allyRecoveredCount, { micro: 1, small: 2, medium: 3 }, true).text,
-          makeReportLine("☑️", "敵復帰", "up", enemyRecoveredCount, { micro: 1, small: 2, medium: 3 }, true).text,
+          `📊 前線差　${diffSymbol(activeDiffDelta, { micro: 1, small: 2, medium: 3 })}`,
+          `🛡️ 味方本陣耐久　${diffSymbol(before.baseHpA - after.baseHpA, { micro: 499, small: 999, medium: 1999 })}`,
+          `💥 敵本陣耐久　${diffSymbol(before.baseHpB - after.baseHpB, { micro: 499, small: 999, medium: 1999 })}`,
+          `⚔️ 味方前線攻撃力　${diffSymbol(after.activeUnitsA - before.activeUnitsA, { micro: 1, small: 2, medium: 3 })}`,
+          `⚔️ 敵前線攻撃力　${diffSymbol(after.activeUnitsB - before.activeUnitsB, { micro: 1, small: 2, medium: 3 })}`,
+          `🔧 味方修理負荷　${diffSymbol(after.repairLoadA - before.repairLoadA, { micro: 1, small: 2, medium: 5 })}`,
+          `🔧 敵修理負荷　${diffSymbol(after.repairLoadB - before.repairLoadB, { micro: 1, small: 2, medium: 5 })}`,
+          `✅ 味方復帰　${diffSymbol(allyRecoveredCount, { micro: 1, small: 2, medium: 3 })}`,
+          `☑️ 敵復帰　${diffSymbol(enemyRecoveredCount, { micro: 1, small: 2, medium: 3 })}`,
         ];
 
         return {
@@ -1550,10 +1540,6 @@
         document.getElementById("roundReportCommand").textContent = "";
         document.getElementById("roundReportBody").innerHTML = "";
         state.isRoundReportOpen = false;
-        if (state.pendingRoundAdvance && !state.result) {
-          state.round = Math.min(state.round + 1, maxRound);
-          refreshOperatorMessage();
-        }
         state.pendingRoundAdvance = false;
         if (!state.result && !state.isConfirmMode && !state.isIntroBriefingOpen) {
           setCommandButtonsEnabled(true);
@@ -1943,7 +1929,6 @@
         document.getElementById("resultHistory").textContent = "";
         setCommandButtonsEnabled(true);
         render();
-        showIntroBriefing();
       }
 
       async function executeCommand(commandId) {
@@ -2060,7 +2045,13 @@
           return;
         }
 
-        showRoundReport(report);
+        state.lastRoundReport = report;
+        state.isRoundReportOpen = false;
+        state.pendingRoundAdvance = false;
+        state.round = Math.min(state.round + 1, maxRound);
+        refreshOperatorMessage();
+        setCommandButtonsEnabled(true);
+        render();
       }
 
       function handleCommand(commandId) {
