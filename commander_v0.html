@@ -249,6 +249,33 @@
         transform: translateY(1px);
       }
 
+      button[data-command="A.中央突破"] {
+        background: linear-gradient(180deg, #fee2e2 0%, #fecaca 100%);
+        border-color: #f87171;
+        color: #7f1d1d;
+      }
+
+      button[data-command="B.側面展開"] {
+        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+        border-color: #fbbf24;
+        color: #78350f;
+      }
+
+      button[data-command="C.迎撃対応"] {
+        background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+        border-color: #60a5fa;
+        color: #1e3a8a;
+      }
+
+      button[data-command]:hover {
+        filter: brightness(1.02);
+      }
+
+      button[data-command]:active {
+        transform: translateY(1px);
+        filter: brightness(0.98);
+      }
+
       .selection {
         min-height: 0;
         font-size: 13px;
@@ -259,16 +286,48 @@
       }
 
       #operator {
+        position: relative;
         padding: 4px 8px;
+        padding-right: 92px;
         background: rgba(255, 255, 255, 0.75);
         border: 1px solid rgba(203, 213, 225, 0.8);
         border-radius: 8px;
         font-size: 17px;
         line-height: 1.42;
+        min-height: 3.05em;
         touch-action: manipulation;
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
+      }
+
+      .report-reopen-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: none;
+        min-height: 0;
+      }
+
+      .report-reopen-button:hover {
+        background: #f1f5f9;
+      }
+
+      .report-reopen-button:active {
+        transform: translateY(1px);
+      }
+
+      .report-reopen-button:disabled {
+        opacity: 0.45;
+        cursor: default;
       }
 
       .result-card #restartButton {
@@ -626,7 +685,10 @@
       </section>
       <div class="panel">
         <div id="roundInfo" class="selection">Round 1 / 10</div>
-        <div id="operator" class="selection">司令、戦況を確認してください。<br />現在の作戦候補を提示します。</div>
+        <div id="operator" class="selection">
+          <span id="operatorMessage">司令、戦況を確認してください。<br />現在の作戦候補を提示します。</span>
+          <button type="button" id="reportReopenButton" class="report-reopen-button" disabled>📊 再確認</button>
+        </div>
         <div class="commands">
           <button type="button" data-command="A.中央突破">A.中央突破</button>
           <button type="button" data-command="B.側面展開">B.側面展開</button>
@@ -843,12 +905,18 @@
         return [
           getFrontlineStatusReport(activeA, activeB),
           getEnemyResultReport(baseHpB, maxHp),
-          "現在の作戦候補を提示します。",
         ].join("<br />");
       }
 
       function refreshOperatorMessage() {
         state.operatorMessage = getOperatorReport(state.baseHpA, state.baseHpB, maxBaseHp);
+      }
+
+      function refreshReportReopenButtonLabel() {
+        const button = document.getElementById("reportReopenButton");
+        if (!button) return;
+        const isRound1 = Math.min(state.round, maxRound) <= 1;
+        button.textContent = isRound1 ? "📋 ブリーフィング" : "📊 再確認";
       }
 
       function getCommandPreviewReport(commandId) {
@@ -1166,7 +1234,13 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
-        document.getElementById("operator").innerHTML = state.operatorMessage;
+        document.getElementById("operatorMessage").innerHTML = state.operatorMessage;
+        const reopenButton = document.getElementById("reportReopenButton");
+        if (reopenButton) {
+          const hasReopenTarget = Math.min(state.round, maxRound) <= 1 || !!state.lastRoundReport;
+          reopenButton.disabled = !hasReopenTarget || state.isRoundReportOpen || state.isConfirmMode || state.isIntroBriefingOpen || !!state.result;
+        }
+        refreshReportReopenButtonLabel();
         const displayBaseHpB = state.baseHpDisplayB;
         const displayBaseHpA = state.baseHpDisplayA;
         drawBaseHpGauge("bGauge", "bGaugeValue", displayBaseHpB, maxBaseHp);
@@ -1206,17 +1280,17 @@
           case "B.側面展開":
             return {
               baseDamageDealt: 800,
-              frontlineDamageDealt: 3200,
-              baseDamageReceived: 400 + 600,
+              frontlineDamageDealt: 800 * 4,
+              baseDamageReceived: 600 + 400,
               frontlineDamageReceived: 600 * 4,
             };
             
           case "C.迎撃対応":
             return {
-              baseDamageDealt: 400,
-              frontlineDamageDealt: 1600,
-              baseDamageReceived: 200,
-              frontlineDamageReceived: 500
+              baseDamageDealt: 600,
+              frontlineDamageDealt: 600 * 4,
+              baseDamageReceived: 260 + 1500,
+              frontlineDamageReceived: 260 * 4,
             };
 
           default:
@@ -1429,10 +1503,10 @@
       function calculateResultScore() {
         const allyHp = Math.max(0, state.baseHpA);
         const enemyHp = Math.max(0, state.baseHpB);
-        const baseScore = state.result === "WIN" ? 50 : state.result === "DRAW" ? 25 : 10;
+        const baseScore = state.result === "WIN" ? 40 : state.result === "DRAW" ? 20 : 10;
         const allyHpScoreBaseHp = maxBaseHp / 2;
-        const allyHpScore = (allyHp / allyHpScoreBaseHp) * 30;
-        const enemyDamageScore = ((maxBaseHp - enemyHp) / maxBaseHp) * 20;
+        const allyHpScore = (allyHp / allyHpScoreBaseHp) * 50;
+        const enemyDamageScore = ((maxBaseHp - enemyHp) / maxBaseHp) * 10;
         return baseScore + allyHpScore + enemyDamageScore;
       }
 
@@ -1453,6 +1527,19 @@
         state.lastRoundReport = report;
         state.isRoundReportOpen = true;
         setCommandButtonsEnabled(false);
+      }
+
+      function reopenRoundReport() {
+        if (state.result || state.isConfirmMode || state.isIntroBriefingOpen) {
+          return;
+        }
+        const isRound1 = Math.min(state.round, maxRound) <= 1;
+        if (isRound1) {
+          showIntroBriefing();
+          return;
+        }
+        if (!state.lastRoundReport) return;
+        showRoundReport(state.lastRoundReport);
       }
 
       function hideRoundReport() {
@@ -2013,6 +2100,9 @@
       document.getElementById("roundReportOkButton").addEventListener("click", () => {
         hideRoundReport();
         render();
+      });
+      document.getElementById("reportReopenButton").addEventListener("click", () => {
+        reopenRoundReport();
       });
 
       showIntroBriefing();
