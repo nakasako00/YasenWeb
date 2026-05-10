@@ -1,0 +1,1321 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>FRONTLINE LOGIC - HTML Prototype</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #f6f7fb;
+        font-family: sans-serif;
+        touch-action: manipulation;
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 2px 4px 6px;
+        box-sizing: border-box;
+      }
+
+      .app {
+        width: min(100%, 480px);
+        display: grid;
+        gap: 2px;
+      }
+
+      canvas {
+        background: #ffffff;
+        border: 1px solid #d9dde8;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      .panel {
+        background: #ffffff;
+        border: 1px solid #d9dde8;
+        border-radius: 10px;
+        padding: 4px 7px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      .gauge-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .gauge-row {
+        display: grid;
+        gap: 0;
+      }
+
+      .gauge-card {
+        display: none;
+      }
+
+      .gauge-track {
+        height: 10px;
+        border-radius: 999px;
+        border: 1px solid #253047;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .gauge-fill {
+        height: 100%;
+        background: #2f7d32;
+        width: 100%;
+      }
+
+      .gauge-fill.low {
+        background: #c62828;
+      }
+
+      .gauge-fill.mid {
+        background: #d97706;
+      }
+
+      .gauge-value {
+        display: none;
+      }
+
+      .panel {
+        display: grid;
+        gap: 1px;
+      }
+
+      .result-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.72);
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .result-overlay.show {
+        display: flex;
+      }
+
+      .result-card {
+        width: min(100%, 320px);
+        display: grid;
+        gap: 6px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 12px 12px 10px;
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
+        text-align: center;
+      }
+
+      .result-title {
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        color: #111827;
+        line-height: 1;
+      }
+
+      .result-subtitle {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+        line-height: 1.2;
+      }
+
+      .damage-summary {
+        width: fit-content;
+        max-width: 100%;
+        justify-self: center;
+        display: grid;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        line-height: 1.15;
+      }
+
+      .damage-title {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: #111827;
+      }
+
+      .damage-grid {
+        display: grid;
+        grid-template-columns: auto 58px 58px;
+        column-gap: 8px;
+        row-gap: 2px;
+        align-items: baseline;
+      }
+
+      .damage-grid .head {
+        color: #111827;
+        font-weight: 800;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .damage-grid .rowlabel {
+        text-align: left;
+        color: #111827;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .damage-grid .value {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .commands {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+      }
+
+      button {
+        appearance: none;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #111827;
+        border-radius: 10px;
+        padding: 12px 4px;
+        min-height: 52px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      button:hover {
+        background: #f8fafc;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .selection {
+        min-height: 0;
+        font-size: 11px;
+        font-weight: 700;
+        color: #1f2937;
+        line-height: 1.2;
+        word-break: break-word;
+      }
+
+      #operator {
+        padding: 1px 6px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(203, 213, 225, 0.8);
+        border-radius: 8px;
+        font-size: 11px;
+        line-height: 1.25;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+
+      .result-card #restartButton {
+        width: 100%;
+        padding: 10px 8px;
+        font-size: 14px;
+      }
+
+      @media (max-width: 520px) {
+        body {
+          padding: 2px 3px 5px;
+        }
+
+        .commands {
+          gap: 2px;
+        }
+
+        button {
+          padding: 6px 3px;
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Commander Mode v1 Prototype: v0同等の安全な起点 -->
+    <div class="app">
+      <canvas id="canvas" width="480" height="670"></canvas>
+      <section class="gauge-card">
+        <div class="gauge-label-row">
+          <span>本陣HP</span>
+          <span id="aGaugeValueText">10000 / 10000</span>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge-track"><div id="aGauge" class="gauge-fill"></div></div>
+          <div id="aGaugeValue" class="gauge-value">10000 / 10000</div>
+        </div>
+      </section>
+      <div class="panel">
+        <div id="roundInfo" class="selection">Round 1 / 10</div>
+        <div id="operator" class="selection">味方部隊を各レーンへ展開中です。<br />派遣レーンを選択してください。</div>
+        <div class="commands">
+          <button type="button" data-command="A.上流">A.上流</button>
+          <button type="button" data-command="B.中央">B.中央</button>
+          <button type="button" data-command="C.下流">C.下流</button>
+        </div>
+      </div>
+    </div>
+    <div id="resultOverlay" class="result-overlay" aria-hidden="true">
+      <div class="result-card">
+        <div id="resultTitle" class="result-title"></div>
+        <div id="resultSubtitle" class="result-subtitle"></div>
+        <div id="resultDamage" class="damage-summary"></div>
+        <button type="button" id="restartButton">Restart</button>
+      </div>
+    </div>
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const maxBaseHp = 10000;
+      const laneLength = 12;
+      const distanceScale = 0.005;
+      const killDamageRate = 0.5;
+      const Jobs = {
+        Juggernaut: "J",
+        Engineer: "E",
+        LightGunner: "L",
+        HeavyGun: "H",
+        Missiler: "M",
+        Recon: "R",
+        Sniper: "S",
+      };
+      const jobLineOrder = ["J", "E", "L", "H", "M", "R", "S"];
+      const jobStats = {
+        L: {
+          cost: 125,
+          maxHp: 375,
+          attack: 145,
+          minRange: 100,
+          maxRange: 300,
+          move: 450,
+          vision: 250,
+          visionPenetration: 150,
+        },
+        E: {
+          cost: 250,
+          maxHp: 500,
+          attack: 100,
+          minRange: 100,
+          maxRange: 300,
+          move: 400,
+          vision: 350,
+          visionPenetration: 200,
+        },
+        J: {
+          cost: 250,
+          maxHp: 620,
+          attack: 300,
+          minRange: 100,
+          maxRange: 150,
+          move: 350,
+          vision: 100,
+          visionPenetration: 0,
+        },
+        H: {
+          cost: 375,
+          maxHp: 470,
+          attack: 200,
+          minRange: 100,
+          maxRange: 350,
+          move: 300,
+          vision: 100,
+          visionPenetration: 0,
+        },
+        M: {
+          cost: 375,
+          maxHp: 400,
+          attack: 200,
+          minRange: 200,
+          maxRange: 400,
+          move: 300,
+          vision: 150,
+          visionPenetration: 0,
+        },
+        R: {
+          cost: 375,
+          maxHp: 300,
+          attack: 200,
+          minRange: 200,
+          maxRange: 400,
+          move: 400,
+          vision: 600,
+          visionPenetration: 600,
+        },
+        S: {
+          cost: 500,
+          maxHp: 150,
+          attack: 400,
+          minRange: 200,
+          maxRange: 450,
+          move: 500,
+          vision: 500,
+          visionPenetration: 200,
+        },
+      };
+      const defaultUnitStats = {
+        maxHp: 100,
+        attack: 10,
+        move: 1.0,
+        minRange: 0,
+        maxRange: 1.0,
+        vision: 1.0,
+        visionPenetration: 0,
+      };
+      const routes = [
+        {
+          id: "upper",
+          label: "上流",
+          distanceMultiplier: 1.25,
+          moveRate: 0.75,
+          visionRate: 0.85,
+          rangeRate: 1.0,
+          concealment: true,
+          canBeShotFromCenter: false,
+          canSupportCenter: true,
+        },
+        {
+          id: "center",
+          label: "中央",
+          distanceMultiplier: 0.85,
+          moveRate: 1.15,
+          visionRate: 1.0,
+          rangeRate: 1.0,
+          concealment: false,
+          canBeShotFromCenter: true,
+          canSupportCenter: false,
+        },
+        {
+          id: "lower",
+          label: "下流",
+          distanceMultiplier: 1.25,
+          moveRate: 0.9,
+          visionRate: 1.35,
+          rangeRate: 1.0,
+          concealment: false,
+          canBeShotFromCenter: true,
+          canSupportCenter: false,
+        },
+      ];
+      // Route cells are defined in map grid coordinates:
+      // x = column (left -> right), y = row (top -> bottom), map[y][x]
+      const routePathCells = {
+        upper: [
+          { x: 4, y: 12 },
+          { x: 3, y: 10 },
+          { x: 2, y: 8 },
+          { x: 1, y: 6 },
+          { x: 2, y: 4 },
+          { x: 3, y: 2 },
+          { x: 4, y: 0 },
+        ],
+        center: [
+          { x: 4, y: 12 },
+          { x: 4, y: 9 },
+          { x: 4, y: 6 },
+          { x: 4, y: 3 },
+          { x: 4, y: 0 },
+        ],
+        lower: [
+          { x: 4, y: 12 },
+          { x: 5, y: 10 },
+          { x: 6, y: 8 },
+          { x: 7, y: 6 },
+          { x: 6, y: 4 },
+          { x: 5, y: 2 },
+          { x: 4, y: 0 },
+        ],
+      };
+      const laneIds = ["upper", "center", "lower"];
+      const unitContactDistance = 100;
+      const allJobs = Object.keys(jobStats);
+      let units = [];
+
+      function createUnit({ id, team, job, routeId, x, stats }) {
+        const resolvedStats = stats ?? jobStats[job] ?? defaultUnitStats;
+        return {
+          id,
+          team,
+          lane: routeId,
+          job,
+          routeId,
+          pos: x,
+          x,
+          hp: resolvedStats.maxHp,
+          maxHp: resolvedStats.maxHp,
+          stats: resolvedStats,
+          alive: true,
+        };
+      }
+
+      const state = {
+        round: 1,
+        baseHpA: maxBaseHp,
+        baseHpB: maxBaseHp,
+        result: null,
+        commandHistory: [],
+        nextUnitIndexA: 0,
+        nextUnitIndexB: 0,
+        attackLines: [],
+        nextDeployJobA: pickRandomJob(),
+        damageStats: {
+          A: { directDamage: 0, killCostDamage: 0, unitDamage: 0 },
+          B: { directDamage: 0, killCostDamage: 0, unitDamage: 0 },
+        },
+      };
+
+      const map = [
+        ["forest", "forest", "forest", "forest", "b_base", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
+        ["river", "bridge", "river", "river", "bridge", "river", "river", "bridge", "river"],
+        ["forest", "road", "forest", "forest", "road", "plain", "plain", "road", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "road", "forest", "road", "plain", "road", "plain", "plain"],
+        ["forest", "forest", "forest", "road", "road", "road", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "road", "plain", "plain", "plain", "plain"],
+        ["forest", "forest", "forest", "forest", "a_base", "plain", "plain", "plain", "plain"],
+      ];
+
+      const terrainStyles = {
+        a_base: { fill: "#1d4ed8", label: "A" },
+        b_base: { fill: "#b91c1c", label: "B" },
+        forest: { fill: "#2f6b3f", label: "森" },
+        road: { fill: "#c7a26a", label: "道" },
+        plain: { fill: "#dfe9c6", label: "平" },
+        river: { fill: "#4f8fcf", label: "川" },
+        bridge: { fill: "#b8894e", label: "橋" },
+      };
+
+      function getTerrainStyle(terrain) {
+        return terrainStyles[terrain] ?? { fill: "#cccccc", label: "?" };
+      }
+
+      function getTerrainLabel(terrain) {
+        return getTerrainStyle(terrain).label;
+      }
+
+      function getJobLabel(jobCode) {
+        const jobLabels = {
+          L: "ライトガンナー",
+          E: "エンジニア",
+          J: "ジャガーノート",
+          H: "ヘビィガン",
+          M: "ミサイラー",
+          R: "レコン",
+          S: "スナイパー",
+        };
+        return jobLabels[jobCode] ?? "不明部隊";
+      }
+
+      function getOperatorReport() {
+        const nextDeployJob = state.nextDeployJobA ? getJobLabel(state.nextDeployJobA) : "不明部隊";
+        return [
+          getBattleSituationText(),
+          `${nextDeployJob}小隊を出撃させます。派遣レーンを選択してください。`,
+        ].join("<br />");
+      }
+
+      function getDamageSummaryText() {
+        return `
+          <div class="damage-title">ダメージ内訳</div>
+          <div class="damage-grid" aria-label="ダメージ内訳">
+            <div></div><div class="head">味方</div><div class="head">敵</div>
+            <div class="rowlabel">直接</div><div class="value">${state.damageStats.A.directDamage}</div><div class="value">${state.damageStats.B.directDamage}</div>
+            <div class="rowlabel">撃破</div><div class="value">${state.damageStats.A.killCostDamage}</div><div class="value">${state.damageStats.B.killCostDamage}</div>
+            <div class="rowlabel">対兵</div><div class="value">${state.damageStats.A.unitDamage}</div><div class="value">${state.damageStats.B.unitDamage}</div>
+          </div>
+        `.trim();
+      }
+
+      function getMapMetrics() {
+        const cols = map[0].length;
+        const rows = map.length;
+        const cellSize = Math.floor(Math.min(canvas.width / cols, canvas.height / rows));
+        const mapWidth = cellSize * cols;
+        const mapHeight = cellSize * rows;
+        const mapX = Math.floor((canvas.width - mapWidth) / 2);
+        const mapY = 0;
+        return { cols, rows, cellSize, mapWidth, mapHeight, mapX, mapY };
+      }
+
+      function getCellCenter(mapX, mapY, cellSize, x, y) {
+        return {
+          x: mapX + x * cellSize + cellSize / 2,
+          y: mapY + y * cellSize + cellSize / 2,
+        };
+      }
+
+      function buildRoutePoints(mapX, mapY, cellSize, cells) {
+        return cells.map((cell) => getCellCenter(mapX, mapY, cellSize, cell.x, cell.y));
+      }
+
+      function strokeSmoothRoute(points) {
+        if (!points.length) return;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        if (points.length === 1) {
+          ctx.lineTo(points[0].x, points[0].y);
+          ctx.stroke();
+          return;
+        }
+
+        for (let i = 1; i < points.length - 1; i++) {
+          const current = points[i];
+          const next = points[i + 1];
+          const midX = (current.x + next.x) / 2;
+          const midY = (current.y + next.y) / 2;
+          ctx.quadraticCurveTo(current.x, current.y, midX, midY);
+        }
+
+        const penultimate = points[points.length - 2];
+        const last = points[points.length - 1];
+        ctx.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
+        ctx.stroke();
+      }
+
+      function getRoutePathPoints(layout, routeId) {
+        const cells = routePathCells[routeId] ?? routePathCells.center;
+        return buildRoutePoints(layout.mapX, layout.mapY, layout.cellSize, cells);
+      }
+
+      function getPointOnPath(points, t) {
+        if (!points.length) return { x: 0, y: 0 };
+        if (points.length === 1) return points[0];
+
+        const clampedT = Math.max(0, Math.min(1, t));
+        const segments = [];
+        let totalLength = 0;
+        for (let i = 0; i < points.length - 1; i++) {
+          const start = points[i];
+          const end = points[i + 1];
+          const dx = end.x - start.x;
+          const dy = end.y - start.y;
+          const length = Math.hypot(dx, dy);
+          segments.push({ start, end, length });
+          totalLength += length;
+        }
+
+        let target = totalLength * clampedT;
+        for (const segment of segments) {
+          if (target <= segment.length) {
+            const ratio = segment.length === 0 ? 0 : target / segment.length;
+            return {
+              x: segment.start.x + (segment.end.x - segment.start.x) * ratio,
+              y: segment.start.y + (segment.end.y - segment.start.y) * ratio,
+            };
+          }
+          target -= segment.length;
+        }
+
+        return points[points.length - 1];
+      }
+
+      function getPositionOnRoute(layout, routeId, pos) {
+        const points = getRoutePathPoints(layout, routeId);
+        return getPointOnPath(points, Math.max(0, Math.min(1, pos / laneLength)));
+      }
+
+      function getUnitCanvasPosition(unit, layout) {
+        return getPositionOnRoute(layout, unit.routeId, unit.pos);
+      }
+
+      function getBaseCanvasPosition(layout, team) {
+        const basePos = team === "A" ? 0 : laneLength;
+        return getPositionOnRoute(layout, "center", basePos);
+      }
+
+      function getRouteById(routeId) {
+        return routes.find((item) => item.id === routeId) ?? routes[1];
+      }
+
+      function getRouteDistanceMultiplier(routeId) {
+        return getRouteById(routeId).distanceMultiplier ?? 1;
+      }
+
+      function getRouteLaneIndex(routeId) {
+        switch (routeId) {
+          case "upper":
+            return 0;
+          case "center":
+            return 1;
+          case "lower":
+            return 2;
+          default:
+            return 1;
+        }
+      }
+
+      function getTacticalDistance(observer, target) {
+        const observerRoute = getRouteById(observer.routeId);
+        const targetRoute = getRouteById(target.routeId);
+        const laneGap = unitContactDistance * distanceScale;
+        const dx = Math.abs(getRouteLaneIndex(observer.routeId) - getRouteLaneIndex(target.routeId)) * laneGap;
+        const routeDistanceMultiplier = ((observerRoute.distanceMultiplier ?? 1) + (targetRoute.distanceMultiplier ?? 1)) / 2;
+        const dy = Math.abs(observer.pos - target.pos) * routeDistanceMultiplier;
+        return Math.hypot(dx, dy);
+      }
+
+      function getTeamVisibleEnemies(team, routeId) {
+        const teamUnits = units.filter((unit) => unit.alive && unit.team === team && unit.routeId === routeId);
+        const enemyUnits = units.filter((unit) => unit.alive && unit.team !== team);
+        const visible = new Map();
+        for (const observer of teamUnits) {
+          const route = getRouteById(observer.routeId);
+          const effectiveVision = observer.stats.vision * route.visionRate * distanceScale;
+          const effectivePenetration = (observer.stats.visionPenetration + 100) * route.visionRate * distanceScale;
+          for (const enemy of enemyUnits) {
+            const distance = getTacticalDistance(observer, enemy);
+            const targetRoute = getRouteById(enemy.routeId);
+            const concealed = Boolean(targetRoute.concealment);
+            if (concealed) {
+              if (distance <= effectivePenetration) {
+                visible.set(enemy.id, enemy);
+              }
+              continue;
+            }
+            if (distance <= effectiveVision) {
+              visible.set(enemy.id, enemy);
+            }
+          }
+        }
+        return [...visible.values()];
+      }
+
+      function isUnitInterceptedByEnemy(unit) {
+        if (unit.team !== "A" || unit.routeId !== "upper" || !unit.alive) {
+          return false;
+        }
+        const enemyUnits = units.filter((other) => other.alive && other.team !== unit.team);
+        for (const observer of enemyUnits) {
+          const route = getRouteById(observer.routeId);
+          const effectivePenetration = (observer.stats.visionPenetration + 100) * route.visionRate * distanceScale;
+          if (getTacticalDistance(observer, unit) <= effectivePenetration) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function findAttackTarget(unit, teamVisibleEnemies) {
+        const route = getRouteById(unit.routeId);
+        const effectiveMinRange = unit.stats.minRange * route.rangeRate * distanceScale;
+        const effectiveMaxRange = unit.stats.maxRange * route.rangeRate * distanceScale;
+        const candidates = teamVisibleEnemies
+          .filter((enemy) => enemy.alive && enemy.team !== unit.team)
+          .map((enemy) => ({
+            enemy,
+            distance: getTacticalDistance(unit, enemy),
+          }))
+          .filter(({ distance }) => distance >= effectiveMinRange && distance <= effectiveMaxRange)
+          .sort((a, b) => a.distance - b.distance);
+        return candidates.length ? candidates[0].enemy : null;
+      }
+
+      function attackUnit(attacker, target) {
+        const beforeHp = target.hp;
+        const actualDamage = Math.max(0, Math.min(beforeHp, attacker.stats.attack));
+        target.hp = Math.max(0, beforeHp - attacker.stats.attack);
+        state.damageStats[attacker.team].unitDamage += actualDamage;
+        if (target.hp <= 0) {
+          target.alive = false;
+        }
+        return { actualDamage, killed: beforeHp > 0 && target.hp <= 0 };
+      }
+
+      function canAttackEnemyBase(unit) {
+        const route = getRouteById(unit.routeId);
+        const distanceMultiplier = route.distanceMultiplier ?? 1;
+        const effectiveMinRange = unit.stats.minRange * route.rangeRate * distanceScale;
+        const effectiveMaxRange = unit.stats.maxRange * route.rangeRate * distanceScale;
+        const effectiveVision = unit.stats.vision * route.visionRate * distanceScale;
+        const distanceToEnemyBase = (unit.team === "A" ? laneLength - unit.pos : unit.pos) * distanceMultiplier;
+        return (
+          distanceToEnemyBase >= effectiveMinRange &&
+          distanceToEnemyBase <= effectiveMaxRange &&
+          distanceToEnemyBase <= effectiveVision
+        );
+      }
+
+      function attackEnemyBase(unit, layout) {
+        const damage = unit.stats.attack;
+        const targetTeam = unit.team === "A" ? "B" : "A";
+        const beforeHp = targetTeam === "B" ? state.baseHpB : state.baseHpA;
+        const actualDamage = Math.max(0, Math.min(beforeHp, damage));
+        if (targetTeam === "B") {
+          state.baseHpB = Math.max(0, state.baseHpB - damage);
+        } else {
+          state.baseHpA = Math.max(0, state.baseHpA - damage);
+        }
+        state.damageStats[unit.team].directDamage += actualDamage;
+        state.attackLines.push({
+          fromUnitId: unit.id,
+          toUnitId: `${targetTeam}_BASE`,
+          fromTeam: unit.team,
+          fromRouteId: unit.routeId,
+          fromPos: unit.pos,
+          toRouteId: unit.routeId,
+          toPos: targetTeam === "B" ? laneLength : 0,
+          toTeam: targetTeam,
+          toIsBase: true,
+          damage,
+        });
+      }
+
+      function drawBaseHpGauge(gaugeId, valueId, currentHp, maxHp) {
+        const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
+        const fill = document.getElementById(gaugeId);
+        const value = document.getElementById(valueId);
+        const inlineValue = document.getElementById(valueId + "Text");
+        if (fill) {
+          fill.style.width = `${hpRate * 100}%`;
+          fill.className = `gauge-fill ${hpRate > 0.5 ? "" : hpRate > 0.2 ? "mid" : "low"}`.trim();
+        }
+        if (value) {
+          value.textContent = `${currentHp} / ${maxHp}`;
+        }
+        if (inlineValue) {
+          inlineValue.textContent = `${currentHp} / ${maxHp}`;
+        }
+      }
+
+      function getEnemyStatusText() {
+        const hpRate = maxBaseHp === 0 ? 0 : state.baseHpB / maxBaseHp;
+        if (hpRate <= 0.2) {
+          return "敵部隊は崩壊寸前です。";
+        }
+        if (hpRate <= 0.5) {
+          return "敵部隊の戦線に大きな損傷を確認しています。";
+        }
+        if (hpRate <= 0.8) {
+          return "敵部隊に損耗が出ています。";
+        }
+        return "敵部隊への損害はまだ限定的です。";
+      }
+
+      function getForceBalanceText() {
+        const aliveA = units.filter((unit) => unit.alive && unit.team === "A").length;
+        const aliveB = units.filter((unit) => unit.alive && unit.team === "B").length;
+        const unitDiff = aliveA - aliveB;
+        if (unitDiff >= 2) {
+          return "戦線枚数ではこちらが優勢です。";
+        }
+        if (unitDiff >= 1) {
+          return "戦線枚数はわずかにこちらが優勢です。";
+        }
+        if (unitDiff === 0) {
+          return "戦線枚数は拮抗しています。";
+        }
+        if (unitDiff <= -2) {
+          return "戦線枚数では押されています。";
+        }
+        return "戦線枚数はやや不利です。";
+      }
+
+      function getBattleSituationText() {
+        const enemyText = getEnemyStatusText();
+        const balanceText = getForceBalanceText();
+        const enemyPrefix = enemyText.endsWith("です。") ? enemyText.slice(0, -2) : enemyText;
+        return `${enemyPrefix}ですが、${balanceText}`;
+      }
+
+      function getKillCostDamage(killedUnit) {
+        return Math.round((killedUnit.stats.cost ?? 0) * killDamageRate);
+      }
+
+      function drawRouteGuide(layout) {
+        const { cellSize, mapX, mapY } = layout;
+        const routeLineWidth = Math.max(2.2, cellSize * 0.055);
+        const routeAlpha = 0.6;
+        const routesToDraw = [
+          {
+            key: "upper",
+            color: `rgba(29, 78, 216, ${routeAlpha})`,
+            points: buildRoutePoints(mapX, mapY, cellSize, routePathCells.upper),
+          },
+          {
+            key: "center",
+            color: `rgba(71, 85, 105, ${routeAlpha})`,
+            points: buildRoutePoints(mapX, mapY, cellSize, routePathCells.center),
+          },
+          {
+            key: "lower",
+            color: `rgba(185, 28, 28, ${routeAlpha})`,
+            points: buildRoutePoints(mapX, mapY, cellSize, routePathCells.lower),
+          },
+        ];
+
+        ctx.save();
+        ctx.lineWidth = routeLineWidth;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.setLineDash([]);
+
+        for (const route of routesToDraw) {
+          ctx.strokeStyle = route.color;
+          strokeSmoothRoute(route.points);
+        }
+        ctx.restore();
+      }
+
+      function drawAttackLines(layout) {
+        if (!state.attackLines.length) return;
+        const { cellSize } = layout;
+        ctx.save();
+        ctx.lineWidth = Math.max(2, cellSize * 0.05);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.setLineDash([]);
+
+        for (const line of state.attackLines) {
+          const from = getPositionOnRoute(layout, line.fromRouteId, line.fromPos);
+          const to = line.toIsBase
+            ? getBaseCanvasPosition(layout, line.toTeam)
+            : getPositionOnRoute(layout, line.toRouteId, line.toPos);
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2;
+          const dx = to.x - from.x;
+          const dy = to.y - from.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const normalX = -dy / distance;
+          const normalY = dx / distance;
+          const arcHeight = Math.max(28, distance * 0.45);
+          const side = line.fromTeam === "A" ? 1 : -1;
+          const controlX = midX + normalX * arcHeight * side;
+          const controlY = midY + normalY * arcHeight * side;
+
+          ctx.strokeStyle = line.fromTeam === "A" ? "rgba(37, 99, 235, 0.62)" : "rgba(220, 38, 38, 0.62)";
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          ctx.quadraticCurveTo(controlX, controlY, to.x, to.y);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function drawMap(layout) {
+        const { cols, rows, cellSize, mapX, mapY } = layout;
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `bold ${Math.max(16, Math.floor(cellSize * 0.42))}px sans-serif`;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const terrain = map[y][x];
+            const { fill } = getTerrainStyle(terrain);
+            const px = mapX + x * cellSize;
+            const py = mapY + y * cellSize;
+
+            ctx.fillStyle = fill;
+            ctx.fillRect(px, py, cellSize, cellSize);
+            ctx.strokeRect(px, py, cellSize, cellSize);
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillText(getTerrainLabel(terrain), Math.round(px + cellSize / 2), Math.round(py + cellSize / 2));
+          }
+        }
+
+        drawRouteGuide(layout);
+      }
+
+      function drawBaseHpBadge(layout, team, currentHp, maxHp) {
+        const { cellSize, mapX, mapY, rows } = layout;
+        const baseCell = team === "B" ? { x: 4, y: 0 } : { x: 4, y: rows - 1 };
+        const baseCenter = getCellCenter(mapX, mapY, cellSize, baseCell.x, baseCell.y);
+        const badgeWidth = Math.max(96, Math.round(cellSize * 1.5));
+        const badgeHeight = Math.max(26, Math.round(cellSize * 0.45));
+        const badgeX = baseCenter.x - badgeWidth / 2;
+        const badgeY = Math.max(4, Math.min(canvas.height - badgeHeight - 4, baseCenter.y + (team === "B" ? -cellSize * 0.14 : cellSize * 0.14) - badgeHeight / 2));
+        const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
+        const trackX = badgeX + 9;
+        const trackY = badgeY + badgeHeight * 0.64;
+        const trackW = badgeWidth - 18;
+        const trackH = 7;
+        const fillWidth = Math.max(0, Math.round(trackW * hpRate));
+        const gaugeFill = team === "B"
+          ? (hpRate > 0.5 ? "#ef4444" : hpRate > 0.2 ? "#f97316" : "#dc2626")
+          : (hpRate > 0.5 ? "#2563eb" : hpRate > 0.2 ? "#3b82f6" : "#1d4ed8");
+
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "rgba(37, 47, 71, 0.36)";
+        ctx.lineWidth = 1;
+        roundRect(ctx, badgeX, badgeY, badgeWidth, badgeHeight, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = `700 ${Math.max(10, Math.floor(cellSize * 0.13))}px sans-serif`;
+        ctx.fillStyle = "#111827";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${currentHp} / ${maxHp}`, badgeX + badgeWidth / 2, badgeY + badgeHeight * 0.25);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#253047";
+        roundRect(ctx, trackX, trackY, trackW, trackH, 999);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = gaugeFill;
+        roundRect(ctx, trackX, trackY, Math.round(trackW * hpRate), trackH, 999);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawUnits(layout) {
+        const { cellSize } = layout;
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `bold ${Math.max(12, Math.floor(cellSize * 0.3))}px sans-serif`;
+        for (const unit of units) {
+          if (!unit.alive) continue;
+          const pxPy = getUnitCanvasPosition(unit, layout);
+          const unitRadius = Math.max(10, cellSize * 0.3);
+          const concealedShade = unit.team === "A" && unit.routeId === "upper" && !isUnitInterceptedByEnemy(unit);
+          ctx.fillStyle = unit.team === "A"
+            ? (concealedShade ? "rgba(100, 116, 139, 0.75)" : "#1d4ed8")
+            : "#b91c1c";
+          ctx.beginPath();
+          ctx.arc(pxPy.x, pxPy.y, unitRadius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = Math.max(1, cellSize * 0.03);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+          ctx.stroke();
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(unit.job, pxPy.x, pxPy.y);
+        }
+        ctx.restore();
+      }
+
+      function getMoveDistance(unit) {
+        const route = getRouteById(unit.routeId);
+        const distanceMultiplier = route.distanceMultiplier ?? 1;
+        return Math.max(1, Math.round((unit.stats.move * route.moveRate * distanceScale) / distanceMultiplier));
+      }
+
+      function getEffectiveContactDistance() {
+        return unitContactDistance * distanceScale;
+      }
+
+      function findNearestFrontUnit(unit, laneUnits) {
+        const frontCandidates = laneUnits.filter((other) => other.id !== unit.id && other.alive && other.routeId === unit.routeId);
+        if (unit.team === "A") {
+          return (
+            frontCandidates
+              .filter((other) => other.pos > unit.pos)
+              .sort((a, b) => a.pos - b.pos)[0] ?? null
+          );
+        }
+        return (
+          frontCandidates
+            .filter((other) => other.pos < unit.pos)
+            .sort((a, b) => b.pos - a.pos)[0] ?? null
+        );
+      }
+
+      function clampMoveByContactDistance(unit, desiredPos, frontUnit) {
+        const contact = getEffectiveContactDistance();
+        if (!frontUnit) return desiredPos;
+        if (unit.team === "A") {
+          return Math.min(desiredPos, frontUnit.pos - contact);
+        }
+        return Math.max(desiredPos, frontUnit.pos + contact);
+      }
+
+      function moveUnit(unit, laneUnits, occupiedPositions) {
+        const direction = unit.team === "A" ? 1 : -1;
+        const steps = getMoveDistance(unit);
+        const frontUnit = findNearestFrontUnit(unit, laneUnits);
+        let moved = false;
+        for (let i = 0; i < steps; i++) {
+          const desiredPos = unit.pos + direction;
+          if (desiredPos < 0 || desiredPos > laneLength) break;
+          if (unit.team === "A" && desiredPos >= laneLength) break;
+          if (unit.team === "B" && desiredPos <= 0) break;
+          const nextPos = clampMoveByContactDistance(unit, desiredPos, frontUnit);
+          if (
+            (unit.team === "A" && nextPos <= unit.pos) ||
+            (unit.team === "B" && nextPos >= unit.pos)
+          ) {
+            break;
+          }
+          if (occupiedPositions.has(nextPos)) break;
+          occupiedPositions.delete(unit.pos);
+          unit.pos = nextPos;
+          unit.x = nextPos;
+          occupiedPositions.add(unit.pos);
+          moved = true;
+        }
+        return moved;
+      }
+
+      function applyKillDamage(killerTeam, killedUnit) {
+        const damage = getKillCostDamage(killedUnit);
+        if (killerTeam === "A") {
+          state.baseHpB = Math.max(0, state.baseHpB - damage);
+        } else {
+          state.baseHpA = Math.max(0, state.baseHpA - damage);
+        }
+        state.damageStats[killerTeam].killCostDamage += damage;
+        return `${killedUnit.id}${killedUnit.job} KILL ${damage}`;
+      }
+
+      function resolveBattleRound() {
+        state.attackLines = [];
+        for (const laneId of laneIds) {
+          const laneUnits = units
+            .filter((unit) => unit.alive && unit.routeId === laneId)
+            .sort((a, b) => {
+              if (a.team !== b.team) return a.team === "A" ? -1 : 1;
+              return a.team === "A" ? a.pos - b.pos : b.pos - a.pos;
+            });
+          const occupiedPositions = new Set(
+            units.filter((unit) => unit.alive && unit.routeId === laneId).map((unit) => unit.pos),
+          );
+          const visibleByTeam = {
+            A: getTeamVisibleEnemies("A", laneId),
+            B: getTeamVisibleEnemies("B", laneId),
+          };
+
+          for (const unit of laneUnits) {
+            if (!unit.alive) {
+              continue;
+            }
+            const target = findAttackTarget(unit, visibleByTeam[unit.team]);
+            if (target) {
+              const attackResult = attackUnit(unit, target);
+              state.attackLines.push({
+                fromUnitId: unit.id,
+                toUnitId: target.id,
+                fromTeam: unit.team,
+                fromRouteId: unit.routeId,
+                fromPos: unit.pos,
+                toRouteId: target.routeId,
+                toPos: target.pos,
+                damage: unit.stats.attack,
+              });
+              if (attackResult.killed) {
+                applyKillDamage(unit.team, target);
+              }
+              continue;
+            }
+
+            if (canAttackEnemyBase(unit)) {
+              attackEnemyBase(unit, getMapMetrics());
+              continue;
+            }
+
+            moveUnit(unit, laneUnits, occupiedPositions);
+          }
+        }
+      }
+
+      function judgeResult() {
+        if (state.baseHpA <= 0 && state.baseHpB <= 0) {
+          state.result = "DRAW";
+          return true;
+        }
+        if (state.baseHpB <= 0) {
+          state.result = "WIN";
+          return true;
+        }
+        if (state.baseHpA <= 0) {
+          state.result = "LOSE";
+          return true;
+        }
+        return false;
+      }
+
+      function setCommandButtonsEnabled(enabled) {
+        document.querySelectorAll("button[data-command]").forEach((button) => {
+          button.disabled = !enabled;
+        });
+      }
+
+      function showResult() {
+        const resultOverlay = document.getElementById("resultOverlay");
+        const resultTitle = document.getElementById("resultTitle");
+        const resultSubtitle = document.getElementById("resultSubtitle");
+        const resultDamage = document.getElementById("resultDamage");
+        resultOverlay.classList.add("show");
+        resultOverlay.setAttribute("aria-hidden", "false");
+        resultTitle.textContent = state.result ?? "";
+        if (state.result === "WIN") {
+          resultSubtitle.textContent = "作戦成功";
+        } else if (state.result === "LOSE") {
+          resultSubtitle.textContent = "作戦失敗";
+        } else {
+          resultSubtitle.textContent = "戦線膠着";
+        }
+        resultDamage.innerHTML = getDamageSummaryText();
+      }
+
+      function resetGame() {
+        state.round = 1;
+        state.baseHpA = maxBaseHp;
+        state.baseHpB = maxBaseHp;
+        state.result = null;
+        state.commandHistory = [];
+        state.nextUnitIndexA = 0;
+        state.nextUnitIndexB = 0;
+        state.attackLines = [];
+        state.nextDeployJobA = pickRandomJob();
+        state.damageStats = {
+          A: { directDamage: 0, killCostDamage: 0, unitDamage: 0 },
+          B: { directDamage: 0, killCostDamage: 0, unitDamage: 0 },
+        };
+        units = [];
+        document.getElementById("resultOverlay").classList.remove("show");
+        document.getElementById("resultOverlay").setAttribute("aria-hidden", "true");
+        document.getElementById("resultTitle").textContent = "";
+        document.getElementById("resultSubtitle").textContent = "";
+        document.getElementById("resultDamage").innerHTML = "";
+        document.getElementById("operator").innerHTML = getOperatorReport();
+        setCommandButtonsEnabled(true);
+        render();
+      }
+
+      function getCommandLane(commandId) {
+        switch (commandId) {
+          case "A.上流":
+            return { routeId: "upper", label: "上流" };
+          case "B.中央":
+            return { routeId: "center", label: "中央" };
+          case "C.下流":
+            return { routeId: "lower", label: "下流" };
+          default:
+            return { routeId: "center", label: "中央" };
+        }
+      }
+
+      function pickRandomJob() {
+        return allJobs[Math.floor(Math.random() * allJobs.length)];
+      }
+
+      function pickRandomRouteId() {
+        const routeIds = laneIds;
+        return routeIds[Math.floor(Math.random() * routeIds.length)];
+      }
+
+      function spawnUnit(team, laneId) {
+        const nextIndex = team === "A" ? state.nextUnitIndexA + 1 : state.nextUnitIndexB + 1;
+        const unit = createUnit({
+          id: `${team}_${nextIndex}`,
+          team,
+          job: team === "A" ? state.nextDeployJobA : pickRandomJob(),
+          routeId: laneId,
+          x: team === "A" ? 0 : laneLength,
+        });
+        if (team === "A") {
+          state.nextUnitIndexA += 1;
+        } else {
+          state.nextUnitIndexB += 1;
+        }
+        units.push(unit);
+        return unit;
+      }
+
+      function rerollNextDeployJobA() {
+        state.nextDeployJobA = pickRandomJob();
+      }
+
+      function resolveTurnRound() {
+        resolveBattleRound();
+      }
+
+      function render() {
+        const layout = getMapMetrics();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#f6f7fb";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        document.getElementById("roundInfo").textContent = `Round ${state.round}`;
+        document.getElementById("operator").innerHTML = getOperatorReport();
+        drawBaseHpGauge("aGauge", "aGaugeValue", state.baseHpA, maxBaseHp);
+        drawMap(layout);
+        drawAttackLines(layout);
+        drawUnits(layout);
+        drawBaseHpBadge(layout, "B", state.baseHpB, maxBaseHp);
+        drawBaseHpBadge(layout, "A", state.baseHpA, maxBaseHp);
+      }
+
+      function handleCommand(commandId) {
+        if (state.result) return;
+
+        const laneChoice = getCommandLane(commandId);
+        state.commandHistory.push(laneChoice.label);
+
+        spawnUnit("A", laneChoice.routeId);
+        spawnUnit("B", pickRandomRouteId());
+        rerollNextDeployJobA();
+
+        resolveTurnRound();
+        render();
+
+        if (judgeResult()) {
+          setCommandButtonsEnabled(false);
+          showResult();
+          return;
+        }
+
+        state.round += 1;
+        render();
+      }
+
+      document.querySelectorAll("button[data-command]").forEach((button) => {
+        button.addEventListener("click", () => handleCommand(button.dataset.command));
+      });
+
+      document.getElementById("restartButton").addEventListener("click", resetGame);
+
+      render();
+    </script>
+  </body>
+</html>

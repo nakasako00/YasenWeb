@@ -31,7 +31,7 @@
       }
 
       body.pwa-system-ui {
-        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px) + 10px);
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 18px);
       }
 
       .app {
@@ -151,7 +151,7 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
         justify-content: center;
         align-items: center;
         gap: 16px;
@@ -183,6 +183,94 @@
 
       .system-button:hover {
         background: #f8fafc;
+      }
+
+      .title-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding:
+          calc(env(safe-area-inset-top, 0px) + 18px)
+          16px
+          calc(env(safe-area-inset-bottom, 0px) + 18px);
+        box-sizing: border-box;
+        background:
+          radial-gradient(circle at top, rgba(37, 99, 235, 0.12), transparent 44%),
+          linear-gradient(180deg, #f8fafc 0%, #e8edf5 100%);
+      }
+
+      .title-screen.show {
+        display: flex;
+      }
+
+      .title-screen-inner {
+        width: min(100%, 420px);
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+        text-align: center;
+      }
+
+      .title-logo {
+        display: grid;
+        gap: 4px;
+        color: #0f172a;
+      }
+
+      .title-logo-main {
+        font-size: clamp(28px, 7vw, 36px);
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        line-height: 1.05;
+      }
+
+      .title-logo-sub {
+        font-size: clamp(15px, 4vw, 19px);
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: #334155;
+      }
+
+      .title-logo-caption {
+        font-size: clamp(11px, 3vw, 13px);
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+
+      .title-visual-frame {
+        width: 100%;
+        padding: 10px;
+        border-radius: 18px;
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+        box-sizing: border-box;
+      }
+
+      .title-visual {
+        display: block;
+        width: 100%;
+        max-height: min(52vh, 460px);
+        object-fit: contain;
+        border-radius: 12px;
+      }
+
+      .title-actions {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .title-action-button {
+        width: 100%;
+        min-height: 58px;
+        font-size: 16px;
+        font-weight: 900;
       }
 
       .result-overlay {
@@ -522,6 +610,121 @@
         display: flex;
       }
 
+      .sound-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10003;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.74);
+        padding: 14px;
+        box-sizing: border-box;
+      }
+
+      .sound-overlay.show {
+        display: flex;
+      }
+
+      .sound-card {
+        width: min(100%, 320px);
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 16px 15px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.26);
+        text-align: center;
+      }
+
+      .sound-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+      }
+
+      .sound-body {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(241, 245, 249, 0.92);
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.55;
+        box-sizing: border-box;
+      }
+
+      .sound-volume {
+        width: 100%;
+        display: grid;
+        gap: 6px;
+        text-align: left;
+      }
+
+      .sound-volume.disabled {
+        opacity: 0.45;
+      }
+
+      .sound-volume-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #334155;
+      }
+
+      .sound-volume-value {
+        min-width: 42px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .sound-slider {
+        width: 100%;
+        margin: 0;
+        accent-color: #2563eb;
+      }
+
+      .sound-toggle-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .sound-toggle {
+        min-height: 52px;
+        padding: 10px 8px;
+        font-size: 16px;
+      }
+
+      .sound-toggle.selected {
+        background: #e8f0ff;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+      }
+
+      .sound-actions {
+        width: 100%;
+        display: block;
+      }
+
+      .sound-start-button {
+        width: 100%;
+        min-height: 58px;
+        padding: 12px 8px;
+        font-size: 16px;
+        font-weight: 900;
+      }
+
       .intro-card {
         width: min(100%, 340px);
         display: grid;
@@ -685,6 +888,27 @@
           padding: 14px 12px 12px;
         }
 
+        .title-screen {
+          padding:
+            calc(env(safe-area-inset-top, 0px) + 14px)
+            12px
+            calc(env(safe-area-inset-bottom, 0px) + 14px);
+        }
+
+        .title-screen-inner {
+          gap: 12px;
+        }
+
+        .title-visual-frame {
+          padding: 8px;
+          border-radius: 16px;
+        }
+
+        .title-action-button {
+          min-height: 54px;
+          font-size: 15px;
+        }
+
         .confirm-title {
           font-size: 18px;
         }
@@ -706,6 +930,34 @@
           width: min(100%, 320px);
           gap: 8px;
           padding: 14px 12px 12px;
+        }
+
+        .sound-card {
+          width: min(100%, 300px);
+          gap: 8px;
+          padding: 14px 12px 12px;
+        }
+
+        .sound-title {
+          font-size: 18px;
+        }
+
+        .sound-body {
+          font-size: 14px;
+        }
+
+        .sound-volume-label-row {
+          font-size: 13px;
+        }
+
+        .sound-toggle {
+          min-height: 50px;
+          font-size: 15px;
+        }
+
+        .sound-start-button {
+          min-height: 54px;
+          font-size: 15px;
         }
 
         .intro-title {
@@ -753,6 +1005,26 @@
   </head>
   <body>
     <div id="versionBadge" class="version-badge" aria-hidden="true"></div>
+    <div id="titleScreen" class="title-screen" aria-hidden="true">
+      <div class="title-screen-inner">
+        <div class="title-logo">
+          <div class="title-logo-main">FRONTLINE LOGIC</div>
+          <div class="title-logo-sub">- 野戦乃庭 -</div>
+          <div class="title-logo-caption">Battle Frame Tactical Simulator</div>
+        </div>
+        <div class="title-visual-frame">
+          <img
+            class="title-visual"
+            src="assets/images/title_battle_frame_v0.png"
+            alt="Battle Frame title visual"
+          />
+        </div>
+        <div class="title-actions">
+          <button type="button" id="gameStartButton" class="title-action-button">GAME START</button>
+          <button type="button" id="soundSettingButton" class="title-action-button">SOUND SETTING</button>
+        </div>
+      </div>
+    </div>
     <div class="app">
       <section class="gauge-card enemy">
         <div class="gauge-label-row">
@@ -830,16 +1102,6 @@
         </div>
       </div>
     </div>
-      <div id="browserActionConfirmOverlay" class="confirm-overlay" aria-hidden="true">
-      <div class="confirm-card system" role="dialog" aria-modal="true" aria-labelledby="browserActionConfirmTitle">
-        <div id="browserActionConfirmTitle" class="confirm-title">前のページへ戻りますか？</div>
-        <div id="browserActionConfirmBody" class="confirm-body">現在のページ状態は失われる場合があります。</div>
-        <div class="confirm-actions">
-          <button type="button" id="browserActionConfirmYesButton">戻る</button>
-          <button type="button" id="browserActionConfirmNoButton">キャンセル</button>
-        </div>
-      </div>
-    </div>
     <div id="introOverlay" class="intro-overlay" aria-hidden="true">
       <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
         <div id="introTitle" class="intro-title">📋作戦開始ブリーフィング</div>
@@ -865,6 +1127,36 @@
         </div>
       </div>
     </div>
+    <div id="soundOverlay" class="sound-overlay" aria-hidden="true">
+      <div class="sound-card" role="dialog" aria-modal="true" aria-labelledby="soundTitle">
+        <div id="soundTitle" class="sound-title">サウンド設定</div>
+        <div class="sound-body">
+          <div>BGMを再生してプレイします。</div>
+          <div class="sound-toggle-group">
+            <button type="button" id="soundOnButton" class="sound-toggle selected" aria-pressed="true">ON</button>
+            <button type="button" id="soundOffButton" class="sound-toggle" aria-pressed="false">OFF</button>
+          </div>
+          <div id="soundVolumeWrap" class="sound-volume">
+            <div class="sound-volume-label-row">
+              <span>音量</span>
+              <span id="soundVolumeValue" class="sound-volume-value">25%</span>
+            </div>
+            <input
+              id="soundVolumeSlider"
+              class="sound-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value="0.25"
+            />
+          </div>
+        </div>
+        <div class="sound-actions">
+          <button type="button" id="soundStartButton" class="sound-start-button">この設定で閉じる</button>
+        </div>
+      </div>
+    </div>
     <div id="roundReportOverlay" class="round-report-overlay" aria-hidden="true">
       <div class="round-report-card" role="dialog" aria-modal="true" aria-labelledby="roundReportTitle">
         <div id="roundReportTitle" class="round-report-title"></div>
@@ -887,6 +1179,7 @@
       // - Increment y for Codex-side implementation adjustments.
       // - Never roll back to a smaller number once used.
       const COMMANDER_VERSION = "v0.1.0";
+      const BGM_VOLUME = 0.05;
 
       const maxBaseHp = 10000;
       const FRONTLINE_DAMAGE_PER_CASUALTY = 1000;
@@ -903,6 +1196,10 @@
       const ALL_UI_GAP_RATE = 0.15;
       const UI_LINE_WIDTH_RATE = 1;
       const UI_LINE_WIDTH_MIN = 1;
+      const bgmAudio = new Audio("assets/audio/bgm.mp3");
+      bgmAudio.loop = true;
+      bgmAudio.preload = "auto";
+      bgmAudio.volume = BGM_VOLUME;
       const state = {
         round: 1,
         baseHpA: maxBaseHp,
@@ -910,7 +1207,9 @@
         result: null,
         pendingCommand: null,
         isConfirmMode: false,
+        isTitleScreenOpen: false,
         isIntroBriefingOpen: false,
+        isSoundConfigOpen: false,
         lastRoundReport: null,
         isRoundReportOpen: false,
         pendingResult: null,
@@ -931,6 +1230,9 @@
         displayedRepairRateA: 0,
         displayedRepairRateB: 0,
         displayedFrontlineAdvantage: 0,
+        hasStartedBgm: false,
+        isBgmEnabled: true,
+        bgmVolume: BGM_VOLUME,
         operatorMessage: "司令、戦況を確認してください。<br />現在の作戦候補を提示します。",
         isUnitDeltaAnimating: false,
         isBaseHpAnimating: false,
@@ -940,7 +1242,6 @@
         unitDeltaAnimationToken: 0,
         gaugeAnimationToken: 0,
         phaseWaitToken: 0,
-        pendingBrowserAction: null,
       };
 
       const map = [
@@ -1017,6 +1318,71 @@
       function refreshVersionBadge() {
         if (!versionBadge) return;
         versionBadge.textContent = COMMANDER_VERSION;
+      }
+
+      function syncBgmVolumeUi() {
+        const slider = document.getElementById("soundVolumeSlider");
+        const value = document.getElementById("soundVolumeValue");
+        if (slider) {
+          slider.value = String(state.bgmVolume);
+        }
+        if (value) {
+          value.textContent = `${Math.round(state.bgmVolume * 100)}%`;
+        }
+      }
+
+      function refreshSoundSelectionUi() {
+        const onButton = document.getElementById("soundOnButton");
+        const offButton = document.getElementById("soundOffButton");
+        const slider = document.getElementById("soundVolumeSlider");
+        const volumeWrap = document.getElementById("soundVolumeWrap");
+        if (onButton) {
+          onButton.classList.toggle("selected", state.isBgmEnabled);
+          onButton.setAttribute("aria-pressed", state.isBgmEnabled ? "true" : "false");
+        }
+        if (offButton) {
+          offButton.classList.toggle("selected", !state.isBgmEnabled);
+          offButton.setAttribute("aria-pressed", !state.isBgmEnabled ? "true" : "false");
+        }
+        if (slider) {
+          slider.disabled = !state.isBgmEnabled;
+        }
+        if (volumeWrap) {
+          volumeWrap.classList.toggle("disabled", !state.isBgmEnabled);
+        }
+      }
+
+      function setBgmVolume(nextVolume) {
+        const clampedVolume = Math.max(0, Math.min(1, Number(nextVolume)));
+        state.bgmVolume = Number.isFinite(clampedVolume) ? clampedVolume : BGM_VOLUME;
+        bgmAudio.volume = state.bgmVolume;
+        syncBgmVolumeUi();
+      }
+
+      function tryPreviewBgmPlayback() {
+        bgmAudio.volume = state.bgmVolume;
+        bgmAudio.play().then(() => {
+          state.hasStartedBgm = true;
+        }).catch((error) => {
+          state.hasStartedBgm = false;
+          console.warn("BGM preview playback failed.", error);
+        });
+      }
+
+      function ensureBgmPlayback() {
+        if (!state.isBgmEnabled || state.hasStartedBgm) return;
+        bgmAudio.volume = state.bgmVolume;
+        state.hasStartedBgm = true;
+        bgmAudio.play().catch((error) => {
+          state.hasStartedBgm = false;
+          console.warn("BGM playback failed.", error);
+        });
+      }
+
+      function stopBgmPlayback() {
+        bgmAudio.pause();
+        bgmAudio.currentTime = 0;
+        state.hasStartedBgm = false;
       }
 
       function refreshSystemPanelVisibility() {
@@ -1533,6 +1899,24 @@
         });
       }
 
+      function showTitleScreen() {
+        const overlay = document.getElementById("titleScreen");
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        state.isTitleScreenOpen = true;
+        setCommandButtonsEnabled(false);
+        if (state.isBgmEnabled) {
+          tryPreviewBgmPlayback();
+        }
+      }
+
+      function hideTitleScreen() {
+        const overlay = document.getElementById("titleScreen");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        state.isTitleScreenOpen = false;
+      }
+
       function getIntroBriefingLines() {
         return [
           "📡 Operatorより報告します。",
@@ -1571,9 +1955,55 @@
         overlay.classList.remove("show");
         overlay.setAttribute("aria-hidden", "true");
         state.isIntroBriefingOpen = false;
-        if (!state.result && !state.isConfirmMode) {
+        if (!state.result && !state.isConfirmMode && !state.isTitleScreenOpen) {
           setCommandButtonsEnabled(true);
         }
+      }
+
+      function showSoundConfig() {
+        const overlay = document.getElementById("soundOverlay");
+        setBgmVolume(state.bgmVolume);
+        refreshSoundSelectionUi();
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        state.isSoundConfigOpen = true;
+        setCommandButtonsEnabled(false);
+        if (state.isBgmEnabled) {
+          tryPreviewBgmPlayback();
+        }
+      }
+
+      function hideSoundConfig() {
+        const overlay = document.getElementById("soundOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        state.isSoundConfigOpen = false;
+      }
+
+      function handleSoundSelection(enabled) {
+        state.isBgmEnabled = enabled;
+        if (enabled) {
+          refreshSoundSelectionUi();
+          ensureBgmPlayback();
+        } else {
+          stopBgmPlayback();
+          refreshSoundSelectionUi();
+        }
+      }
+
+      function handleSoundConfigConfirm() {
+        hideSoundConfig();
+      }
+
+      function handleGameStart() {
+        hideTitleScreen();
+        if (state.isBgmEnabled) {
+          ensureBgmPlayback();
+        } else {
+          stopBgmPlayback();
+        }
+        showIntroBriefing();
+        render();
       }
 
       function getBattleSnapshot() {
@@ -1754,7 +2184,7 @@
       }
 
       function reopenRoundReport() {
-        if (state.result || state.isConfirmMode || state.isIntroBriefingOpen) {
+        if (state.result || state.isConfirmMode || state.isIntroBriefingOpen || state.isSoundConfigOpen || state.isTitleScreenOpen) {
           return;
         }
         const isRound1 = Math.min(state.round, maxRound) <= 1;
@@ -1775,13 +2205,13 @@
         document.getElementById("roundReportBody").innerHTML = "";
         state.isRoundReportOpen = false;
         state.pendingRoundAdvance = false;
-        if (!state.result && !state.isConfirmMode && !state.isIntroBriefingOpen) {
+        if (!state.result && !state.isConfirmMode && !state.isIntroBriefingOpen && !state.isSoundConfigOpen && !state.isTitleScreenOpen) {
           setCommandButtonsEnabled(true);
         }
       }
 
       function showOperationConfirm(commandId) {
-        if (state.result || state.isIntroBriefingOpen || state.isRoundReportOpen) return;
+        if (state.result || state.isIntroBriefingOpen || state.isRoundReportOpen || state.isSoundConfigOpen || state.isTitleScreenOpen) return;
         const overlay = document.getElementById("operationConfirmOverlay");
         document.getElementById("confirmCommand").textContent = commandId;
         document.getElementById("confirmBody").innerHTML = getCommandPreviewReport(commandId)
@@ -1804,42 +2234,6 @@
         state.pendingCommand = null;
         state.isConfirmMode = false;
         setCommandButtonsEnabled(true);
-      }
-
-      function showBrowserActionConfirm(action) {
-        if (!isStandaloneMode()) return;
-        const overlay = document.getElementById("browserActionConfirmOverlay");
-        const title = document.getElementById("browserActionConfirmTitle");
-        const body = document.getElementById("browserActionConfirmBody");
-        const yesButton = document.getElementById("browserActionConfirmYesButton");
-        state.pendingBrowserAction = action;
-        title.textContent = action === "back" ? "前のページへ戻りますか？" : "ページを再読み込みしますか？";
-        body.textContent = "現在のページ状態は失われる場合があります。";
-        yesButton.textContent = action === "back" ? "戻る" : "再読み込み";
-        overlay.classList.add("show");
-        overlay.setAttribute("aria-hidden", "false");
-      }
-
-      function hideBrowserActionConfirm() {
-        const overlay = document.getElementById("browserActionConfirmOverlay");
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden", "true");
-        document.getElementById("browserActionConfirmTitle").textContent = "";
-        document.getElementById("browserActionConfirmBody").textContent = "";
-        document.getElementById("browserActionConfirmYesButton").textContent = "";
-        state.pendingBrowserAction = null;
-      }
-
-      function handleBrowserActionConfirm(action) {
-        if (action === "confirm") {
-          if (state.pendingBrowserAction === "back") {
-            history.back();
-            return;
-          }
-          location.reload();
-          return;
-        }
-        hideBrowserActionConfirm();
       }
 
       function getActiveUnitCount(team) {
@@ -2166,7 +2560,9 @@
         state.pendingResult = null;
         state.pendingRoundAdvance = false;
         state.isConfirmMode = false;
-        state.isIntroBriefingOpen = true;
+        state.isTitleScreenOpen = false;
+        state.isIntroBriefingOpen = false;
+        state.isSoundConfigOpen = false;
         state.lastRoundReport = null;
         state.isRoundReportOpen = false;
         state.isUnitDeltaAnimating = false;
@@ -2186,8 +2582,13 @@
         state.displayedRepairRateA = 0;
         state.displayedRepairRateB = 0;
         state.displayedFrontlineAdvantage = 0;
+        state.isBgmEnabled = true;
+        state.bgmVolume = BGM_VOLUME;
+        stopBgmPlayback();
         refreshOperatorMessage();
         hideOperationConfirm();
+        hideTitleScreen();
+        hideSoundConfig();
         hideIntroBriefing();
         hideRoundReport();
         document.getElementById("resultOverlay").classList.remove("show");
@@ -2200,6 +2601,7 @@
         document.getElementById("resultAllyHp").textContent = "";
         document.getElementById("resultHistory").textContent = "";
         setCommandButtonsEnabled(true);
+        showTitleScreen();
         render();
       }
 
@@ -2332,7 +2734,7 @@
       }
 
       function handleCommand(commandId) {
-        if (state.result || state.isConfirmMode || state.isIntroBriefingOpen || state.isRoundReportOpen || state.isUnitDeltaAnimating || state.isBaseHpAnimating || state.isOtherGaugeAnimating || state.isPhaseWaiting) return;
+        if (state.result || state.isConfirmMode || state.isTitleScreenOpen || state.isIntroBriefingOpen || state.isSoundConfigOpen || state.isRoundReportOpen || state.isUnitDeltaAnimating || state.isBaseHpAnimating || state.isOtherGaugeAnimating || state.isPhaseWaiting) return;
         showOperationConfirm(commandId);
       }
 
@@ -2360,7 +2762,15 @@
       document.getElementById("confirmYesButton").addEventListener("click", () => handleConfirmAction("confirm"));
       document.getElementById("confirmNoButton").addEventListener("click", () => handleConfirmAction("cancel"));
 
+      document.getElementById("gameStartButton").addEventListener("click", handleGameStart);
+      document.getElementById("soundSettingButton").addEventListener("click", showSoundConfig);
       document.getElementById("restartButton").addEventListener("click", resetGame);
+      document.getElementById("soundOnButton").addEventListener("click", () => handleSoundSelection(true));
+      document.getElementById("soundOffButton").addEventListener("click", () => handleSoundSelection(false));
+      document.getElementById("soundStartButton").addEventListener("click", handleSoundConfigConfirm);
+      document.getElementById("soundVolumeSlider").addEventListener("input", (event) => {
+        setBgmVolume(event.target.value);
+      });
       document.getElementById("introOkButton").addEventListener("click", () => {
         hideIntroBriefing();
         render();
@@ -2372,15 +2782,8 @@
       document.getElementById("reportReopenButton").addEventListener("click", () => {
         reopenRoundReport();
       });
-      document.getElementById("backButton").addEventListener("click", () => showBrowserActionConfirm("back"));
-      document.getElementById("reloadButton").addEventListener("click", () => showBrowserActionConfirm("reload"));
-      document.getElementById("browserActionConfirmYesButton").addEventListener("click", () => handleBrowserActionConfirm("confirm"));
-      document.getElementById("browserActionConfirmNoButton").addEventListener("click", () => handleBrowserActionConfirm("cancel"));
-      document.getElementById("browserActionConfirmOverlay").addEventListener("click", (event) => {
-        if (event.target === event.currentTarget) {
-          hideBrowserActionConfirm();
-        }
-      });
+      document.getElementById("backButton").addEventListener("click", () => history.back());
+      document.getElementById("reloadButton").addEventListener("click", () => location.reload());
 
       refreshSystemPanelVisibility();
       const standaloneQuery = window.matchMedia("(display-mode: standalone)");
@@ -2389,7 +2792,8 @@
       }
 
       refreshVersionBadge();
-      showIntroBriefing();
+      syncBgmVolumeUi();
+      showTitleScreen();
       render();
     </script>
   </body>
