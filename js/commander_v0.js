@@ -938,9 +938,34 @@
         }
       }
 
+      function refreshSoundSelectionUi() {
+        const soundOnButton = document.getElementById("soundOnButton");
+        const soundOffButton = document.getElementById("soundOffButton");
+        const soundVolumeWrap = document.getElementById("soundVolumeWrap");
+        const soundVolumeSlider = document.getElementById("soundVolumeSlider");
+
+        if (soundOnButton) {
+          soundOnButton.classList.toggle("selected", state.isBgmEnabled);
+          soundOnButton.setAttribute("aria-pressed", String(state.isBgmEnabled));
+        }
+        if (soundOffButton) {
+          soundOffButton.classList.toggle("selected", !state.isBgmEnabled);
+          soundOffButton.setAttribute("aria-pressed", String(!state.isBgmEnabled));
+        }
+        if (soundVolumeWrap) {
+          soundVolumeWrap.classList.toggle("disabled", !state.isBgmEnabled);
+        }
+        if (soundVolumeSlider) {
+          soundVolumeSlider.disabled = !state.isBgmEnabled;
+        }
+        syncBgmVolumeUi();
+        syncSeVolumeUi();
+      }
+
       function showSoundConfig() {
         const overlay = document.getElementById("soundOverlay");
         setBgmVolume(state.bgmVolume);
+        setSeVolume(state.seVolume);
         refreshSoundSelectionUi();
         overlay.classList.add("show");
         overlay.setAttribute("aria-hidden", "false");

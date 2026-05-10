@@ -600,10 +600,13 @@
         inset: 0;
         z-index: 10001;
         display: none;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         background: rgba(15, 23, 42, 0.74);
-        padding: 14px;
+        padding:
+          calc(env(safe-area-inset-top, 0px) + 14px)
+          14px
+          calc(env(safe-area-inset-bottom, 0px) + 92px);
         box-sizing: border-box;
       }
 
