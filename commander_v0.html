@@ -36,6 +36,24 @@
         gap: 1px;
       }
 
+      .version-badge {
+        position: fixed;
+        right: 6px;
+        top: 6px;
+        z-index: 20;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(248, 250, 252, 0.92);
+        border: 1px solid rgba(203, 213, 225, 0.95);
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0.04em;
+        pointer-events: none;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+      }
+
       .map-stage {
         position: relative;
       }
@@ -183,7 +201,7 @@
       }
 
       .system-panel {
-        display: flex;
+        display: none;
         justify-content: center;
         align-items: center;
         gap: 16px;
@@ -191,6 +209,10 @@
         background: linear-gradient(180deg, #f8fafc, #eef2f7);
         border-color: #e2e8f0;
         box-shadow: none;
+      }
+
+      .system-panel.show {
+        display: flex;
       }
 
       .system-button {
@@ -777,6 +799,7 @@
     </style>
   </head>
   <body>
+    <div id="versionBadge" class="version-badge" aria-hidden="true"></div>
     <div class="app">
       <section class="gauge-card enemy">
         <div class="gauge-label-row">
@@ -906,6 +929,15 @@
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
       const frontlineMarker = document.getElementById("frontlineMarker");
+      const systemPanel = document.querySelector(".system-panel");
+      const versionBadge = document.getElementById("versionBadge");
+
+      // Versioning policy for commander_v0.html:
+      // - Keep the stream in v0.x.y until v1 work formally starts.
+      // - Increment x for large ChatGPT-side design changes.
+      // - Increment y for Codex-side implementation adjustments.
+      // - Never roll back to a smaller number once used.
+      const COMMANDER_VERSION = "v0.1.0";
 
       const maxBaseHp = 10000;
       const FRONTLINE_DAMAGE_PER_CASUALTY = 1000;
@@ -1027,6 +1059,20 @@
 
       function getTerrainLabel(terrain) {
         return getTerrainStyle(terrain).label;
+      }
+
+      function isStandaloneMode() {
+        return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      }
+
+      function refreshVersionBadge() {
+        if (!versionBadge) return;
+        versionBadge.textContent = COMMANDER_VERSION;
+      }
+
+      function refreshSystemPanelVisibility() {
+        if (!systemPanel) return;
+        systemPanel.classList.toggle("show", isStandaloneMode());
       }
 
       function getFrontlineStatusReport(activeA, activeB) {
@@ -1806,6 +1852,7 @@
       }
 
       function showBrowserActionConfirm(action) {
+        if (!isStandaloneMode()) return;
         const overlay = document.getElementById("browserActionConfirmOverlay");
         const title = document.getElementById("browserActionConfirmTitle");
         const body = document.getElementById("browserActionConfirmBody");
@@ -2380,6 +2427,13 @@
         }
       });
 
+      refreshSystemPanelVisibility();
+      const standaloneQuery = window.matchMedia("(display-mode: standalone)");
+      if (typeof standaloneQuery.addEventListener === "function") {
+        standaloneQuery.addEventListener("change", refreshSystemPanelVisibility);
+      }
+
+      refreshVersionBadge();
       showIntroBriefing();
       render();
     </script>
