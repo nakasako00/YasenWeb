@@ -30,6 +30,10 @@
         box-sizing: border-box;
       }
 
+      body.pwa-system-ui {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+      }
+
       .app {
         width: min(100%, 480px);
         display: grid;
@@ -144,13 +148,20 @@
 
       .system-panel {
         display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: max(8px, env(safe-area-inset-bottom, 0px));
         justify-content: center;
         align-items: center;
         gap: 16px;
-        padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
-        background: linear-gradient(180deg, #f8fafc, #eef2f7);
+        width: min(100%, 480px);
+        margin: 0 auto;
+        padding: 8px 12px;
+        background: rgba(248, 250, 252, 0.94);
         border-color: #e2e8f0;
         box-shadow: none;
+        z-index: 40;
       }
 
       .system-panel.show {
@@ -1009,8 +1020,10 @@
       }
 
       function refreshSystemPanelVisibility() {
+        const isStandalone = isStandaloneMode();
         if (!systemPanel) return;
-        systemPanel.classList.toggle("show", isStandaloneMode());
+        systemPanel.classList.toggle("show", isStandalone);
+        document.body.classList.toggle("pwa-system-ui", isStandalone);
       }
 
       function getFrontlineStatusReport(activeA, activeB) {
