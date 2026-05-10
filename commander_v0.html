@@ -1023,6 +1023,7 @@
         <div class="title-actions">
           <button type="button" id="gameStartButton" class="title-action-button">GAME START</button>
           <button type="button" id="soundSettingButton" class="title-action-button">SOUND SETTING</button>
+          <button type="button" id="bgmStartButton" class="title-action-button">BGM START</button>
         </div>
       </div>
     </div>
@@ -1428,6 +1429,7 @@
           }
           bgmAudio.play().then(() => {
             state.hasStartedBgm = true;
+            console.log("BGM preview playback started.");
           }).catch((error) => {
             state.hasStartedBgm = false;
             console.warn("BGM preview playback failed.", error);
@@ -2085,6 +2087,39 @@
         }
         showIntroBriefing();
         render();
+      }
+
+      function handleDebugBgmStart() {
+        state.isBgmEnabled = true;
+        refreshSoundSelectionUi();
+        console.log("BGM START pressed.", {
+          useWebAudio: shouldUseWebAudio(),
+          audioContextState: bgmAudioContext ? bgmAudioContext.state : "not-initialized",
+        });
+        prepareBgmPlayback().finally(() => {
+          console.log("BGM START prepare finished.", {
+            useWebAudio: shouldUseWebAudio(),
+            audioContextState: bgmAudioContext ? bgmAudioContext.state : "not-initialized",
+          });
+          if (!state.isBgmEnabled || state.hasStartedBgm) return;
+          if (shouldUseWebAudio() && bgmGainNode) {
+            bgmGainNode.gain.value = state.bgmVolume;
+          }
+          bgmAudio.play().then(() => {
+            state.hasStartedBgm = true;
+            console.log("BGM START play success.", {
+              useWebAudio: shouldUseWebAudio(),
+              audioContextState: bgmAudioContext ? bgmAudioContext.state : "not-initialized",
+            });
+          }).catch((error) => {
+            state.hasStartedBgm = false;
+            console.warn("BGM START play failed.", {
+              useWebAudio: shouldUseWebAudio(),
+              audioContextState: bgmAudioContext ? bgmAudioContext.state : "not-initialized",
+              error,
+            });
+          });
+        });
       }
 
       function getBattleSnapshot() {
@@ -2845,6 +2880,7 @@
 
       document.getElementById("gameStartButton").addEventListener("click", handleGameStart);
       document.getElementById("soundSettingButton").addEventListener("click", showSoundConfig);
+      document.getElementById("bgmStartButton").addEventListener("click", handleDebugBgmStart);
       document.getElementById("restartButton").addEventListener("click", resetGame);
       document.getElementById("soundOnButton").addEventListener("click", () => handleSoundSelection(true));
       document.getElementById("soundOffButton").addEventListener("click", () => handleSoundSelection(false));
