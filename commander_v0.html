@@ -1379,6 +1379,15 @@
         });
       }
 
+      function scheduleStartupBgmPlayback() {
+        if (isIOSLikeDevice() || !state.isBgmEnabled || state.hasStartedBgm) return;
+        requestAnimationFrame(() => {
+          window.setTimeout(() => {
+            tryPreviewBgmPlayback();
+          }, 0);
+        });
+      }
+
       function ensureBgmPlayback() {
         if (!state.isBgmEnabled || state.hasStartedBgm) return;
         bgmAudio.volume = state.bgmVolume;
@@ -1915,9 +1924,7 @@
         overlay.setAttribute("aria-hidden", "false");
         state.isTitleScreenOpen = true;
         setCommandButtonsEnabled(false);
-        if (!isIOSLikeDevice() && state.isBgmEnabled) {
-          tryPreviewBgmPlayback();
-        }
+        scheduleStartupBgmPlayback();
       }
 
       function hideTitleScreen() {
@@ -2808,6 +2815,7 @@
       syncBgmVolumeUi();
       showTitleScreen();
       render();
+      scheduleStartupBgmPlayback();
     </script>
   </body>
 </html>
