@@ -1200,7 +1200,12 @@
       const bgmAudio = new Audio("assets/audio/bgm.mp3");
       bgmAudio.loop = true;
       bgmAudio.preload = "auto";
-      bgmAudio.volume = BGM_VOLUME;
+      bgmAudio.volume = 1;
+      bgmAudio.load();
+      let bgmAudioContext = null;
+      let bgmSourceNode = null;
+      let bgmGainNode = null;
+      let hasInitializedAudioGraph = false;
       const state = {
         round: 1,
         baseHpA: maxBaseHp,
@@ -1316,6 +1321,14 @@
         return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
       }
 
+      function isFileProtocol() {
+        return window.location.protocol === "file:";
+      }
+
+      function shouldUseWebAudio() {
+        return !isFileProtocol();
+      }
+
       function isIOSLikeDevice() {
         const platform = window.navigator.platform ?? "";
         const userAgent = window.navigator.userAgent ?? "";
@@ -1364,18 +1377,61 @@
       function setBgmVolume(nextVolume) {
         const clampedVolume = Math.max(0, Math.min(1, Number(nextVolume)));
         state.bgmVolume = Number.isFinite(clampedVolume) ? clampedVolume : BGM_VOLUME;
-        bgmAudio.volume = state.bgmVolume;
+        if (shouldUseWebAudio()) {
+          bgmAudio.volume = 1;
+        } else {
+          bgmAudio.volume = state.bgmVolume;
+        }
+        if (shouldUseWebAudio() && bgmGainNode) {
+          bgmGainNode.gain.value = state.bgmVolume;
+        }
         syncBgmVolumeUi();
+      }
+
+      function initializeBgmAudioGraph() {
+        if (!shouldUseWebAudio() || hasInitializedAudioGraph) return;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        bgmAudioContext = new AudioContextClass();
+        bgmSourceNode = bgmAudioContext.createMediaElementSource(bgmAudio);
+        bgmGainNode = bgmAudioContext.createGain();
+        bgmGainNode.gain.value = state.bgmVolume;
+        bgmSourceNode.connect(bgmGainNode);
+        bgmGainNode.connect(bgmAudioContext.destination);
+        hasInitializedAudioGraph = true;
+      }
+
+      function prepareBgmPlayback() {
+        if (!shouldUseWebAudio()) {
+          bgmAudio.volume = state.bgmVolume;
+          return Promise.resolve();
+        }
+        try {
+          initializeBgmAudioGraph();
+          if (bgmAudioContext && bgmAudioContext.state === "suspended") {
+            return bgmAudioContext.resume().catch((error) => {
+              console.warn("AudioContext resume failed.", error);
+            });
+          }
+        } catch (error) {
+          console.warn("BGM audio graph initialization failed.", error);
+        }
+        return Promise.resolve();
       }
 
       function tryPreviewBgmPlayback() {
         if (!state.isBgmEnabled || state.hasStartedBgm) return;
-        bgmAudio.volume = state.bgmVolume;
-        bgmAudio.play().then(() => {
-          state.hasStartedBgm = true;
-        }).catch((error) => {
-          state.hasStartedBgm = false;
-          console.warn("BGM preview playback failed.", error);
+        prepareBgmPlayback().finally(() => {
+          if (!state.isBgmEnabled || state.hasStartedBgm) return;
+          if (shouldUseWebAudio() && bgmGainNode) {
+            bgmGainNode.gain.value = state.bgmVolume;
+          }
+          bgmAudio.play().then(() => {
+            state.hasStartedBgm = true;
+          }).catch((error) => {
+            state.hasStartedBgm = false;
+            console.warn("BGM preview playback failed.", error);
+          });
         });
       }
 
@@ -1390,17 +1446,25 @@
 
       function ensureBgmPlayback() {
         if (!state.isBgmEnabled || state.hasStartedBgm) return;
-        bgmAudio.volume = state.bgmVolume;
-        state.hasStartedBgm = true;
-        bgmAudio.play().catch((error) => {
-          state.hasStartedBgm = false;
-          console.warn("BGM playback failed.", error);
+        prepareBgmPlayback().finally(() => {
+          if (!state.isBgmEnabled || state.hasStartedBgm) return;
+          if (shouldUseWebAudio() && bgmGainNode) {
+            bgmGainNode.gain.value = state.bgmVolume;
+          }
+          state.hasStartedBgm = true;
+          bgmAudio.play().catch((error) => {
+            state.hasStartedBgm = false;
+            console.warn("BGM playback failed.", error);
+          });
         });
       }
 
       function stopBgmPlayback() {
         bgmAudio.pause();
         bgmAudio.currentTime = 0;
+        if (shouldUseWebAudio() && bgmGainNode) {
+          bgmGainNode.gain.value = 0;
+        }
         state.hasStartedBgm = false;
       }
 
@@ -2804,6 +2868,17 @@
       });
       document.getElementById("backButton").addEventListener("click", () => history.back());
       document.getElementById("reloadButton").addEventListener("click", () => location.reload());
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && state.isBgmEnabled) {
+          prepareBgmPlayback().finally(() => {
+            if (shouldUseWebAudio() && bgmGainNode) {
+              bgmGainNode.gain.value = state.hasStartedBgm ? state.bgmVolume : 0;
+            } else if (!shouldUseWebAudio()) {
+              bgmAudio.volume = state.bgmVolume;
+            }
+          });
+        }
+      });
 
       refreshSystemPanelVisibility();
       const standaloneQuery = window.matchMedia("(display-mode: standalone)");
@@ -2812,6 +2887,7 @@
       }
 
       refreshVersionBadge();
+      setBgmVolume(state.bgmVolume);
       syncBgmVolumeUi();
       showTitleScreen();
       render();
