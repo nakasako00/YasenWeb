@@ -113,7 +113,8 @@
       }
 
       .gauge-card,
-      .panel {
+      .panel,
+      .system-panel {
         background: #ffffff;
         border: 1px solid #d9dde8;
         border-radius: 10px;
@@ -179,6 +180,34 @@
       .panel {
         display: grid;
         gap: 1px;
+      }
+
+      .system-panel {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg, #f8fafc, #eef2f7);
+        border-color: #e2e8f0;
+        box-shadow: none;
+      }
+
+      .system-button {
+        flex: 0 0 auto;
+        min-width: 46px;
+        min-height: 46px;
+        padding: 0;
+        font-size: 22px;
+        font-weight: 700;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #334155;
+        box-shadow: none;
+      }
+
+      .system-button:hover {
+        background: #f8fafc;
       }
 
       .result-overlay {
@@ -496,6 +525,12 @@
         font-weight: 900;
       }
 
+      .confirm-card.system {
+        width: min(100%, 308px);
+        gap: 9px;
+        padding: 14px 13px 13px;
+      }
+
       .intro-overlay {
         position: fixed;
         inset: 0;
@@ -781,6 +816,10 @@
           <button type="button" data-command="C.迎撃対応">C.迎撃対応</button>
         </div>
       </div>
+      <div class="system-panel">
+        <button type="button" id="backButton" class="system-button" aria-label="戻る">←</button>
+        <button type="button" id="reloadButton" class="system-button" aria-label="再読み込み">↻</button>
+      </div>
     </div>
     <div id="resultOverlay" class="result-overlay" aria-hidden="true">
       <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
@@ -815,6 +854,16 @@
         <div class="confirm-actions">
           <button type="button" id="confirmYesButton">YES</button>
           <button type="button" id="confirmNoButton">NO</button>
+        </div>
+      </div>
+    </div>
+      <div id="browserActionConfirmOverlay" class="confirm-overlay" aria-hidden="true">
+      <div class="confirm-card system" role="dialog" aria-modal="true" aria-labelledby="browserActionConfirmTitle">
+        <div id="browserActionConfirmTitle" class="confirm-title">前のページへ戻りますか？</div>
+        <div id="browserActionConfirmBody" class="confirm-body">現在のページ状態は失われる場合があります。</div>
+        <div class="confirm-actions">
+          <button type="button" id="browserActionConfirmYesButton">戻る</button>
+          <button type="button" id="browserActionConfirmNoButton">キャンセル</button>
         </div>
       </div>
     </div>
@@ -910,6 +959,7 @@
         unitDeltaAnimationToken: 0,
         gaugeAnimationToken: 0,
         phaseWaitToken: 0,
+        pendingBrowserAction: null,
       };
 
       const map = [
@@ -1755,6 +1805,41 @@
         setCommandButtonsEnabled(true);
       }
 
+      function showBrowserActionConfirm(action) {
+        const overlay = document.getElementById("browserActionConfirmOverlay");
+        const title = document.getElementById("browserActionConfirmTitle");
+        const body = document.getElementById("browserActionConfirmBody");
+        const yesButton = document.getElementById("browserActionConfirmYesButton");
+        state.pendingBrowserAction = action;
+        title.textContent = action === "back" ? "前のページへ戻りますか？" : "ページを再読み込みしますか？";
+        body.textContent = "現在のページ状態は失われる場合があります。";
+        yesButton.textContent = action === "back" ? "戻る" : "再読み込み";
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+
+      function hideBrowserActionConfirm() {
+        const overlay = document.getElementById("browserActionConfirmOverlay");
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+        document.getElementById("browserActionConfirmTitle").textContent = "";
+        document.getElementById("browserActionConfirmBody").textContent = "";
+        document.getElementById("browserActionConfirmYesButton").textContent = "";
+        state.pendingBrowserAction = null;
+      }
+
+      function handleBrowserActionConfirm(action) {
+        if (action === "confirm") {
+          if (state.pendingBrowserAction === "back") {
+            history.back();
+            return;
+          }
+          location.reload();
+          return;
+        }
+        hideBrowserActionConfirm();
+      }
+
       function getActiveUnitCount(team) {
         return team === "A" ? maxUnitsA - state.repairQueueA.length : maxUnitsB - state.repairQueueB.length;
       }
@@ -2284,6 +2369,15 @@
       });
       document.getElementById("reportReopenButton").addEventListener("click", () => {
         reopenRoundReport();
+      });
+      document.getElementById("backButton").addEventListener("click", () => showBrowserActionConfirm("back"));
+      document.getElementById("reloadButton").addEventListener("click", () => showBrowserActionConfirm("reload"));
+      document.getElementById("browserActionConfirmYesButton").addEventListener("click", () => handleBrowserActionConfirm("confirm"));
+      document.getElementById("browserActionConfirmNoButton").addEventListener("click", () => handleBrowserActionConfirm("cancel"));
+      document.getElementById("browserActionConfirmOverlay").addEventListener("click", (event) => {
+        if (event.target === event.currentTarget) {
+          hideBrowserActionConfirm();
+        }
       });
 
       showIntroBriefing();
