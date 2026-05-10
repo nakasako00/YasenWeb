@@ -36,6 +36,10 @@
         gap: 1px;
       }
 
+      .map-stage {
+        position: relative;
+      }
+
       canvas {
         background: #ffffff;
         border: 1px solid #d9dde8;
@@ -48,6 +52,64 @@
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
+      }
+
+      .frontline-marker {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 28px;
+        height: 28px;
+        z-index: 3;
+        pointer-events: none;
+        opacity: 1;
+        visibility: hidden;
+        isolation: isolate;
+        overflow: visible;
+      }
+
+      .frontline-marker.show {
+        visibility: visible;
+      }
+
+      .frontline-marker-badge {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        padding: 0;
+        border-radius: 999px;
+        border: 2px solid rgb(71, 85, 105);
+        background: #ffffff;
+        background-clip: padding-box;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
+        color: rgb(30, 41, 59);
+        font-size: 14px;
+        text-align: center;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .frontline-marker-badge::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: #ffffff;
+        z-index: 0;
+      }
+
+      .frontline-marker-badge > span {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        line-height: 1;
       }
 
       .gauge-card,
@@ -143,21 +205,22 @@
         background: linear-gradient(180deg, #ffffff, #f8fafc);
         border: 1px solid #cbd5e1;
         border-radius: 14px;
-        padding: 14px 14px 12px;
+        padding: 0 0 12px;
         box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
         text-align: center;
+        overflow: hidden;
       }
 
       .result-card.win {
-        background: linear-gradient(180deg, #dbeafe 0%, #eef4ff 18%, #ffffff 34%);
+        background: #ffffff;
       }
 
       .result-card.lose {
-        background: linear-gradient(180deg, #ffe1e1 0%, #fff0f0 18%, #ffffff 34%);
+        background: #ffffff;
       }
 
       .result-card.draw {
-        background: linear-gradient(180deg, #e5e7eb 0%, #eef0f3 18%, #ffffff 34%);
+        background: #ffffff;
       }
 
       .result-overlay.show .result-card,
@@ -168,12 +231,48 @@
         animation: modalOpenPaperY 190ms cubic-bezier(0.16, 1, 0.3, 1);
       }
 
+      .result-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px 8px;
+        box-sizing: border-box;
+        background: #cbd5e1;
+      }
+
+      .result-card.win .result-header {
+        background: #0066dd;
+      }
+
+      .result-card.lose .result-header {
+        background: #cc2222;
+      }
+
+      .result-card.draw .result-header {
+        background: #9098a3;
+      }
+
       .result-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0;
         font-size: 28px;
         font-weight: 900;
         letter-spacing: 0.08em;
-        color: #111827;
+        color: #f8fafc;
         line-height: 1;
+      }
+
+      .result-body {
+        width: 100%;
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        padding: 0 14px;
+        box-sizing: border-box;
       }
 
       .result-subtitle {
@@ -211,13 +310,22 @@
       .result-hp-row {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         gap: 10px;
         font-size: 12px;
         font-weight: 800;
         color: #111827;
       }
 
-      .result-hp-row span:last-child {
+      .result-hp-label {
+        flex: 0 0 44px;
+        text-align: left;
+      }
+
+      .result-hp-value {
+        flex: 1 1 auto;
+        text-align: right;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-variant-numeric: tabular-nums;
       }
 
@@ -645,7 +753,12 @@
           <div id="bGaugeValue" class="gauge-value">10000 / 10000</div>
         </div>
       </section>
-      <canvas id="canvas" width="480" height="598"></canvas>
+      <div class="map-stage">
+        <canvas id="canvas" width="480" height="612"></canvas>
+        <div id="frontlineMarker" class="frontline-marker" aria-hidden="true">
+          <div class="frontline-marker-badge"><span>⚔️</span></div>
+        </div>
+      </div>
       <section class="gauge-card">
         <div class="gauge-label-row">
           <span>本陣HP</span>
@@ -671,16 +784,26 @@
     </div>
     <div id="resultOverlay" class="result-overlay" aria-hidden="true">
       <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
-        <div id="resultTitle" class="result-title"></div>
-        <div id="resultSubtitle" class="result-subtitle"></div>
-        <div id="resultRound" class="result-round"></div>
-        <div id="resultScore" class="result-score"></div>
-        <div id="resultHp" class="result-hp">
-          <div id="resultEnemyHp" class="result-hp-row"></div>
-          <div id="resultAllyHp" class="result-hp-row"></div>
+        <div class="result-header">
+          <div id="resultTitle" class="result-title"></div>
         </div>
-        <div id="resultHistory" class="result-subtitle"></div>
-        <button type="button" id="restartButton">Restart</button>
+        <div class="result-body">
+          <div id="resultSubtitle" class="result-subtitle"></div>
+          <div id="resultRound" class="result-round"></div>
+          <div id="resultScore" class="result-score"></div>
+          <div id="resultHp" class="result-hp">
+            <div class="result-hp-row">
+              <span class="result-hp-label">敵HP</span>
+              <span id="resultEnemyHp" class="result-hp-value"></span>
+            </div>
+            <div class="result-hp-row">
+              <span class="result-hp-label">味方HP</span>
+              <span id="resultAllyHp" class="result-hp-value"></span>
+            </div>
+          </div>
+          <div id="resultHistory" class="result-subtitle"></div>
+          <button type="button" id="restartButton">Restart</button>
+        </div>
       </div>
     </div>
     <div id="operationConfirmOverlay" class="confirm-overlay" aria-hidden="true">
@@ -697,7 +820,7 @@
     </div>
     <div id="introOverlay" class="intro-overlay" aria-hidden="true">
       <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-        <div id="introTitle" class="intro-title">作戦開始ブリーフィング</div>
+        <div id="introTitle" class="intro-title">📋作戦開始ブリーフィング</div>
         <div id="introBody" class="intro-body">
           <div>司令、戦況はすでに最終局面にあります。</div>
           <div>Aチームは敵本陣目前まで前線を押し上げました。</div>
@@ -733,6 +856,7 @@
     <script>
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
+      const frontlineMarker = document.getElementById("frontlineMarker");
 
       const maxBaseHp = 10000;
       const FRONTLINE_DAMAGE_PER_CASUALTY = 1000;
@@ -749,7 +873,6 @@
       const ALL_UI_GAP_RATE = 0.15;
       const UI_LINE_WIDTH_RATE = 1;
       const UI_LINE_WIDTH_MIN = 1;
-
       const state = {
         round: 1,
         baseHpA: maxBaseHp,
@@ -777,6 +900,7 @@
         displayedAttackPowerRateB: 1,
         displayedRepairRateA: 0,
         displayedRepairRateB: 0,
+        displayedFrontlineAdvantage: 0,
         operatorMessage: "司令、戦況を確認してください。<br />現在の作戦候補を提示します。",
         isUnitDeltaAnimating: false,
         isBaseHpAnimating: false,
@@ -889,7 +1013,7 @@
         const button = document.getElementById("reportReopenButton");
         if (!button) return;
         const isRound1 = Math.min(state.round, maxRound) <= 1;
-        button.textContent = isRound1 ? "📋 再確認" : "📊 レポート";
+        button.textContent = isRound1 ? "📋 再確認" : "📊 再確認";
       }
 
       function getCommandPreviewReport(commandId) {
@@ -976,7 +1100,7 @@
             ctx.fillRect(px, py, cellSize, cellSize);
             ctx.strokeRect(px, py, cellSize, cellSize);
 
-            ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+            ctx.fillStyle = x === 0 ? "rgba(255, 255, 255, 0.18)" : "rgba(255, 255, 255, 0.9)";
             ctx.fillText(label, Math.round(px + cellSize / 2), Math.round(py + cellSize / 2));
           }
         }
@@ -994,10 +1118,10 @@
         const baseCell = team === "B" ? { x: 4, y: 0 } : { x: 4, y: rows - 1 };
         const baseCenter = getCellCenter(mapX, mapY, cellSize, baseCell.x, baseCell.y);
         const badgeWidth = Math.round(cellSize * 3.0);
-        const badgeHeight = Math.round(cellSize * 1.0);
+        const badgeHeight = Math.round(cellSize * 0.8);
         const badgeX = baseCenter.x - badgeWidth / 2;
         const margin = cellSize * ALL_UI_MARGIN_RATE;
-        const offsetY = team === "B" ? -cellSize * 0.48 + margin - 1 : -cellSize * 0.48 - margin - 1;
+        const offsetY = team === "B" ?  - cellSize * 0.5 + margin : cellSize * 0.5 - badgeHeight - margin;
         const badgeY = baseCenter.y + offsetY;
         const hpRate = Math.max(0, Math.min(1, currentHp / maxHp));
 
@@ -1009,11 +1133,14 @@
         ctx.fill();
         ctx.stroke();
 
-        ctx.font = `700 ${Math.floor(cellSize * 0.3)}px sans-serif`;
+        ctx.font = `700 ${Math.floor(cellSize * 0.27)}px sans-serif`;
         ctx.fillStyle = "#111827";
-        ctx.textAlign = "center";
+        ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        ctx.fillText(`${currentHp} / ${maxHp}`, badgeX + badgeWidth / 2, badgeY + badgeHeight * 0.3);
+        ctx.fillText(`${currentHp} / ${maxHp}`, badgeX + badgeWidth - 10, badgeY + badgeHeight * 0.3);
+
+        ctx.textAlign = "left";
+        ctx.fillText(team === "B" ? `💥` : `🛡️`, badgeX + 10, badgeY + badgeHeight * 0.3);
 
         const trackX = badgeX + 10;
         const trackY = badgeY + badgeHeight * 0.63;
@@ -1143,6 +1270,52 @@
         ctx.stroke();
       }
 
+      function drawFrontlineAdvantageGauge(layout, advantage) {
+        const { cellSize, mapX, mapY, mapHeight } = layout;
+        const railW = Math.max(7, Math.round(cellSize * 0.32));
+        const sideUiMargin = Math.round(cellSize * ALL_UI_MARGIN_RATE);
+        const leftUiAnchorX = mapX + sideUiMargin;
+        const railInset = Math.max(1, Math.round(cellSize * ALL_UI_MARGIN_RATE * 0.24));
+        const railH = Math.max(28, Math.round(cellSize * 5.1));
+        const railX = Math.round(leftUiAnchorX + railInset);
+        const railY = Math.round(mapY + (mapHeight - railH) / 2);
+        const clamped = Math.max(-1, Math.min(1, advantage));
+        const knobX = railX + railW / 2;
+        const knobY = railY + railH * ((clamped + 1) / 2);
+        const upperH = Math.floor(railH / 2);
+        const lowerY = railY + upperH;
+        const lowerH = railH - upperH;
+        const railGradient = ctx.createLinearGradient(0, railY, 0, railY + railH);
+        railGradient.addColorStop(0, "rgb(255, 32, 32)");
+        railGradient.addColorStop(0.50, "rgb(160, 160, 160)");
+        railGradient.addColorStop(1, "rgb(32, 64, 255)");
+
+        ctx.save();
+        ctx.fillStyle = railGradient;
+        ctx.lineWidth = 1;
+        roundRect(ctx, railX, railY, railW, railH, Math.max(2, railW / 2));
+        ctx.fill();
+
+        ctx.strokeStyle = "rgb(31, 41, 55)";
+        roundRect(ctx, railX, railY, railW, railH, Math.max(2, railW / 2));
+        ctx.stroke();
+        ctx.restore();
+
+        if (frontlineMarker) {
+          const badgeSize = Math.max(30, Math.round(cellSize * 0.42));
+          const badge = frontlineMarker.firstElementChild;
+          const opticalCenterOffsetX = Math.max(1, Math.round(badgeSize * 0.04));
+          frontlineMarker.style.width = `${badgeSize}px`;
+          frontlineMarker.style.height = `${badgeSize}px`;
+          frontlineMarker.style.left = `${knobX - badgeSize / 2 + opticalCenterOffsetX}px`;
+          frontlineMarker.style.top = `${knobY - badgeSize / 2}px`;
+          frontlineMarker.classList.add("show");
+          if (badge) {
+            badge.style.fontSize = `${Math.max(14, Math.floor(cellSize * 0.2))}px`;
+          }
+        }
+      }
+
       function drawAbstractPieces(layout, team, count, pulse = null) {
         const { cellSize, mapX, mapY } = layout;
         const slots = abstractUnitSlots[team];
@@ -1205,6 +1378,9 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#f6f7fb";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (frontlineMarker) {
+          frontlineMarker.classList.remove("show");
+        }
 
         document.getElementById("roundInfo").textContent = `Round ${state.round} / ${maxRound}`;
         document.getElementById("operatorMessage").innerHTML = state.operatorMessage;
@@ -1232,6 +1408,7 @@
         const visibleCountA = state.isUnitDeltaAnimating ? state.unitDisplayCountA : getActiveUnitCount("A");
         drawAbstractPieces(layout, "B", visibleCountB, state.unitDeltaPulse);
         drawAbstractPieces(layout, "A", visibleCountA, state.unitDeltaPulse);
+        drawFrontlineAdvantageGauge(layout, state.displayedFrontlineAdvantage);
         drawFrontlineGauge(layout, "B", state.displayedAttackPowerRateB);
         drawFrontlineGauge(layout, "A", state.displayedAttackPowerRateA);
         drawRepairGauge(layout, "B", state.displayedRepairRateB);
@@ -1368,11 +1545,16 @@
       }
 
       function getBattleRatesFromSnapshot(snapshot) {
+        const frontlineAdvantage = Math.max(
+          -1,
+          Math.min(1, (snapshot.activeUnitsA - snapshot.activeUnitsB) / Math.max(1, Math.max(maxUnitsA, maxUnitsB))),
+        );
         return {
           attackPowerRateA: maxUnitsA > 0 ? snapshot.activeUnitsA / maxUnitsA : 0,
           attackPowerRateB: maxUnitsB > 0 ? snapshot.activeUnitsB / maxUnitsB : 0,
           repairRateA: Math.max(0, Math.min(1, snapshot.repairLoadA / REPAIR_GAUGE_DISPLAY_MAX)),
           repairRateB: Math.max(0, Math.min(1, snapshot.repairLoadB / REPAIR_GAUGE_DISPLAY_MAX)),
+          frontlineAdvantage,
         };
       }
 
@@ -1382,6 +1564,7 @@
         state.displayedAttackPowerRateB = rates.attackPowerRateB;
         state.displayedRepairRateA = rates.repairRateA;
         state.displayedRepairRateB = rates.repairRateB;
+        state.displayedFrontlineAdvantage = rates.frontlineAdvantage;
       }
 
       function classifySeverity(value, thresholds) {
@@ -1473,8 +1656,8 @@
 
         const lines = [
           `📊 前線差　${diffSymbol(activeDiffDelta, { micro: 1, small: 2, medium: 3 })}`,
-          `🛡️ 味方本陣耐久　${diffSymbol(before.baseHpA - after.baseHpA, { micro: 499, small: 999, medium: 1999 })}`,
-          `💥 敵本陣耐久　${diffSymbol(before.baseHpB - after.baseHpB, { micro: 499, small: 999, medium: 1999 })}`,
+          `🛡️ 味方本陣耐久　${diffSymbol(after.baseHpA - before.baseHpA, { micro: 499, small: 999, medium: 1999 })}`,
+          `💥 敵本陣耐久　${diffSymbol(after.baseHpB - before.baseHpB, { micro: 499, small: 999, medium: 1999 })}`,
           `⚔️ 味方前線攻撃力　${diffSymbol(after.activeUnitsA - before.activeUnitsA, { micro: 1, small: 2, medium: 3 })}`,
           `⚔️ 敵前線攻撃力　${diffSymbol(after.activeUnitsB - before.activeUnitsB, { micro: 1, small: 2, medium: 3 })}`,
           `🔧 味方修理負荷　${diffSymbol(after.repairLoadA - before.repairLoadA, { micro: 1, small: 2, medium: 5 })}`,
@@ -1502,7 +1685,7 @@
 
       function showRoundReport(report) {
         const overlay = document.getElementById("roundReportOverlay");
-        document.getElementById("roundReportTitle").textContent = `ROUND ${report.round} 戦況レポート`;
+        document.getElementById("roundReportTitle").textContent = `ROUND ${report.round} 📊戦況レポート`;
         document.getElementById("roundReportCommand").textContent = `前回作戦: ${report.commandLabel}`;
         const body = document.getElementById("roundReportBody");
         body.innerHTML = "";
@@ -1746,6 +1929,7 @@
             state.displayedAttackPowerRateB = before.attackPowerRateB + (after.attackPowerRateB - before.attackPowerRateB) * eased;
             state.displayedRepairRateA = before.repairRateA + (after.repairRateA - before.repairRateA) * eased;
             state.displayedRepairRateB = before.repairRateB + (after.repairRateB - before.repairRateB) * eased;
+            state.displayedFrontlineAdvantage = before.frontlineAdvantage + (after.frontlineAdvantage - before.frontlineAdvantage) * eased;
             render();
             if (t < 1) {
               requestAnimationFrame(step);
@@ -1853,8 +2037,8 @@
         resultRound.textContent = `Round ${Math.min(state.round, maxRound)} / ${maxRound}`;
         const scoreValue = calculateResultScore();
         resultScore.textContent = `SCORE ${Math.round(scoreValue * 10) / 10}`;
-        resultEnemyHp.textContent = `敵HP ${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayB))} / ${maxBaseHp}`;
-        resultAllyHp.textContent = `味方HP ${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayA))} / ${maxBaseHp}`;
+        resultEnemyHp.textContent = `${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayB))} / ${maxBaseHp}`;
+        resultAllyHp.textContent = `${Math.max(0, Math.min(maxBaseHp, state.baseHpDisplayA))} / ${maxBaseHp}`;
         resultHistory.textContent = `作戦履歴: ${state.commandHistory.length ? state.commandHistory.join(" ") : "なし"}`;
         hideOperationConfirm();
         hideIntroBriefing();
@@ -1914,6 +2098,7 @@
         state.displayedAttackPowerRateB = 1;
         state.displayedRepairRateA = 0;
         state.displayedRepairRateB = 0;
+        state.displayedFrontlineAdvantage = 0;
         refreshOperatorMessage();
         hideOperationConfirm();
         hideIntroBriefing();
@@ -1945,6 +2130,7 @@
         state.displayedAttackPowerRateB = beforeRates.attackPowerRateB;
         state.displayedRepairRateA = beforeRates.repairRateA;
         state.displayedRepairRateB = beforeRates.repairRateB;
+        state.displayedFrontlineAdvantage = beforeRates.frontlineAdvantage;
         state.commandHistory.push(commandId[0]);
 
         const chosenDamage = getCommandDamage(commandId);
@@ -1999,6 +2185,7 @@
           attackPowerRateB: gaugeBefore.attackPowerRateB,
           repairRateA: gaugeBefore.repairRateA,
           repairRateB: gaugeBefore.repairRateB,
+          frontlineAdvantage: gaugeBefore.frontlineAdvantage,
         };
         const hpAfter = {
           baseHpA: gaugeAfter.baseHpA,
@@ -2007,6 +2194,7 @@
           attackPowerRateB: gaugeBefore.attackPowerRateB,
           repairRateA: gaugeBefore.repairRateA,
           repairRateB: gaugeBefore.repairRateB,
+          frontlineAdvantage: gaugeBefore.frontlineAdvantage,
         };
         if (!(await playBattleGaugeAnimation(hpBefore, hpAfter))) {
           state.isOtherGaugeAnimating = false;
@@ -2023,6 +2211,7 @@
           attackPowerRateB: gaugeBefore.attackPowerRateB,
           repairRateA: gaugeBefore.repairRateA,
           repairRateB: gaugeBefore.repairRateB,
+          frontlineAdvantage: gaugeBefore.frontlineAdvantage,
         };
         const otherAfter = {
           baseHpA: hpAfter.baseHpA,
@@ -2031,6 +2220,7 @@
           attackPowerRateB: gaugeAfter.attackPowerRateB,
           repairRateA: gaugeAfter.repairRateA,
           repairRateB: gaugeAfter.repairRateB,
+          frontlineAdvantage: gaugeAfter.frontlineAdvantage,
         };
         if (!(await animateOtherGauges(otherBefore, otherAfter, state.gaugeAnimationToken, 400))) {
           state.isOtherGaugeAnimating = false;
@@ -2050,8 +2240,8 @@
         state.pendingRoundAdvance = false;
         state.round = Math.min(state.round + 1, maxRound);
         refreshOperatorMessage();
-        setCommandButtonsEnabled(true);
         render();
+        showRoundReport(report);
       }
 
       function handleCommand(commandId) {
