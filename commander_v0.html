@@ -31,7 +31,7 @@
       }
 
       body.pwa-system-ui {
-        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px) + 10px);
       }
 
       .app {
@@ -151,7 +151,7 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: max(8px, env(safe-area-inset-bottom, 0px));
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
         justify-content: center;
         align-items: center;
         gap: 16px;
